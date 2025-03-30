@@ -4,8 +4,7 @@ import { useState } from "react";
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import tw from "twrnc";
-
-const apiUrl = "https://keep.kevindupas.com/api";
+import { authService } from "@/services/auth/authService";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -25,36 +24,16 @@ export default function LoginScreen() {
     setDebug("Démarre la connexion...");
 
     try {
-      setDebug((prev) => prev + `URL de l'API: ${apiUrl}/login`);
+      setDebug((prev) => prev + `URL de l'API: /login`);
 
-      const response = await fetch(`${apiUrl}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const rawText = await response.text();
-      setDebug(
-        (prev) => prev + `Réponse brute: ${rawText.substring(0, 50)}...\n`
-      );
-
-      let data;
-      try {
-        data = JSON.parse(rawText);
-        setDebug((prev) => prev + `Réponse parsé avec succès\n`);
-      } catch (error) {
-        setDebug((prev) => prev + `Erreur: ${(error as Error).message}`);
-        return;
-      }
-
+      const data = await authService.login({ email, password });
       setDebug((prev) => prev + `Connexion réussie\n`);
 
       await signIn(data.access_token, data.user);
     } catch (error) {
       setDebug((prev) => prev + `Erreur: ${(error as Error).message}`);
+    } finally {
+      setLoading(false);
     }
   };
 

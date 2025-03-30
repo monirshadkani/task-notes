@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter, useSegments } from "expo-router";
 import {
   createContext,
@@ -7,12 +6,8 @@ import {
   useEffect,
   useState,
 } from "react";
-
-type User = {
-  id: number;
-  name: string;
-  email: string;
-};
+import { User } from "@/services/auth/auth.types";
+import { storageService } from "@/services/storage/asyncStorage";
 
 type AuthContextType = {
   signIn: (token: string, userData: User) => Promise<void>;
@@ -34,8 +29,8 @@ export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
-  const [userToken, setUserToken] = useState<string | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [userToken, setUserTokenState] = useState<string | null>(null);
+  const [user, setUserState] = useState<User | null>(null);
   const router = useRouter();
   const segments = useSegments();
 
@@ -56,20 +51,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadToken = async () => {
       try {
-        const token = await AsyncStorage.getItem("userToken");
-        const userData = await AsyncStorage.getItem("userData");
+        const token = await storageService.getUserToken();
+        const userData = await storageService.getUserData();
 
-        setUserToken(token);
-
-        if (userData) {
-          try {
-            const userInfo = JSON.parse(userData);
-            setUser(userInfo);
-          } catch (error) {
-            console.error(error);
-            await signOut();
-          }
-        }
+        setUserTokenState(token);
+        setUserState(userData);
       } catch (error) {
         console.error(error);
       } finally {
@@ -82,10 +68,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (token: string, userData: User) => {
     try {
-      await AsyncStorage.setItem("userToken", token);
-      await AsyncStorage.setItem("userData", JSON.stringify(userData));
-      setUserToken(token);
-      setUser(userData);
+      await storageService.setUserToken(token);
+      await storageService.setUserData(userData);
+      setUserTokenState(token);
+      setUserState(userData);
     } catch (error) {
       console.error(error);
     }
@@ -93,10 +79,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      await AsyncStorage.removeItem("userToken");
-      await AsyncStorage.removeItem("userData");
-      setUserToken(null);
-      setUser(null);
+      await storageService.removeUserData();
+      setUserTokenState(null);
+      setUserState(null);
     } catch (error) {
       console.error(error);
     }

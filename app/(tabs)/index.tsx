@@ -1,6 +1,14 @@
 //Écran principal des notes
-import { StyleSheet, Image, Platform, Button } from "react-native";
-
+import {
+  StyleSheet,
+  Image,
+  Platform,
+  Button,
+  View,
+  Text,
+  StatusBar,
+} from "react-native";
+import React from "react";
 import { Collapsible } from "@/components/Collapsible";
 import { ExternalLink } from "@/components/ExternalLink";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
@@ -8,6 +16,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useAuth } from "../_layout";
+import { NoteList } from "@/components/notes/NoteList";
 
 export default function Index() {
   const { user, userToken, signOut } = useAuth();
@@ -23,6 +32,7 @@ export default function Index() {
         />
       }
     >
+      <NoteList />
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Explore</ThemedText>
       </ThemedView>
