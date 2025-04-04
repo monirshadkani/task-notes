@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 import { Note } from "@/types/note.types";
 import { Category } from "@/types/category.types";

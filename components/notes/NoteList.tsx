@@ -10,10 +10,9 @@ import {
 } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import tw from "twrnc";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNotes } from "@/contexts/NotesContext";
 import { Note } from "@/types/note.types";
-import { useEffect } from "react";
 import { noteService } from "@/services/notes/noteService";
 
 export const NoteList = () => {

@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { User } from "../auth/auth.types";
 import { Note } from "@/types/note.types";
+import { Task } from "@/types/task.types";
 
 const STORAGE_KEYS = {
   USER_TOKEN: "userToken",
@@ -48,6 +49,23 @@ export const storageService = {
   },
   async getNotesStorage(): Promise<Note[]> {
     const data = await AsyncStorage.getItem(STORAGE_KEYS.NOTES);
+    if (data) {
+      try {
+        return JSON.parse(data);
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
+    }
+    return [];
+  },
+
+  async setTasksStorage(tasks: Task[]): Promise<void> {
+    await AsyncStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
+  },
+
+  async getTasksStorage(): Promise<Task[]> {
+    const data = await AsyncStorage.getItem(STORAGE_KEYS.TASKS);
     if (data) {
       try {
         return JSON.parse(data);

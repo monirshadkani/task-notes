@@ -1,5 +1,6 @@
 import { AuthProvider } from "@/contexts/AuthContext";
 import { NotesProvider } from "@/contexts/NotesContext";
+import { TasksProvider } from "@/contexts/TasksContext";
 import { ThemeProvider } from "@react-navigation/native";
 import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { useFonts } from "expo-font";
@@ -36,16 +37,18 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <NotesProvider>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="auth" />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
+        <TasksProvider>
+          <ThemeProvider
+            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+          >
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="auth" />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </TasksProvider>
       </NotesProvider>
     </AuthProvider>
   );
