@@ -1,24 +1,15 @@
 // Écran principal des tâches
-//Écran principal des notes
-import {
-  StyleSheet,
-  Image,
-  Platform,
-  Button,
-  View,
-  Text,
-  StatusBar,
-} from "react-native";
+import { Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
-import { useAuth } from "../_layout";
 import { TaskList } from "@/components/tasks/TaskList";
 import tw from "twrnc";
 
 export default function Tasks() {
   return (
-    <View>
+    <SafeAreaView style={tw`flex-1`}>
       <Text style={tw`text-black dark:text-white font-bold`}>Tasks</Text>
       <TaskList />
-    </View>
+    </SafeAreaView>
   );
 }

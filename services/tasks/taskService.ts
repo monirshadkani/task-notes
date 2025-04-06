@@ -6,4 +6,7 @@ export const taskService = {
   async getTasksApi(): Promise<Task[]> {
     return apiClient.get<Task[]>(ENDPOINTS.tasks.list);
   },
+  async setTaskApi(task: Task): Promise<Task> {
+    return apiClient.post<Task>(ENDPOINTS.tasks.create, task);
+  },
 };

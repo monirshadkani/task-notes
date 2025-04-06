@@ -25,6 +25,10 @@ export const apiClient = {
         throw { message: responseData.message || "Something went wrong" };
       }
 
+      if (endpoint === "/login") {
+        return responseData;
+      }
+
       return responseData.data;
     } catch (error) {
       throw { message: "Failed to connect to the server" };

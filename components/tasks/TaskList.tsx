@@ -1,15 +1,24 @@
 //Composant de liste des tâches
-import { View, Text } from "react-native";
-import { FlashList } from "@shopify/flash-list";
+import {
+  View,
+  Text,
+  ScrollView,
+  RefreshControl,
+  TouchableOpacity,
+} from "react-native";
 import tw from "twrnc";
 import { useState, useEffect } from "react";
 import { Task } from "@/types/task.types";
 import { taskService } from "@/services/tasks/taskService";
 import { useTasks } from "@/contexts/TasksContext";
+import React from "react";
+import { router } from "expo-router";
+import { IconSymbol } from "../ui/IconSymbol";
 
 export const TaskList = () => {
   const { tasks, getTasks, setTasks } = useTasks();
   const [displayTasks, setDisplayTasks] = useState<Task[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -29,41 +38,75 @@ export const TaskList = () => {
     fetchTasks();
   }, []);
 
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true);
+      const apiTasks = await taskService.getTasksApi();
+      await setTasks(apiTasks);
+      setDisplayTasks(apiTasks);
+    } catch (error) {
+      console.error("Failed to refresh tasks:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const navigateToCreate = () => {
+    router.push("/tasks/create");
+  };
+
   return (
-    <FlashList
-      data={displayTasks}
-      renderItem={({ item }: { item: Task }) => (
-        <View>
-          <Text style={tw`text-black dark:text-white font-bold`}>
-            {item.id}
-          </Text>
-          <Text style={tw`text-black dark:text-white font-bold`}>
-            {item.description}
-          </Text>
-          <Text style={tw`text-black dark:text-white font-bold`}>
-            {item.created_at}
-          </Text>
-          <Text style={tw`text-black dark:text-white font-bold`}>
-            {item.is_completed}
-          </Text>
-          <Text style={tw`text-black dark:text-white font-bold`}>
-            {item.updated_at}
-          </Text>
-          {item.subtasks.map((subtask) => (
-            <View>
-              <Text style={tw`text-black dark:text-white font-bold`}>
-                {subtask.id}
-              </Text>
-              <Text style={tw`text-black dark:text-white font-bold`}>
-                {subtask.description}
-              </Text>
-              <Text style={tw`text-black dark:text-white font-bold`}>
-                {subtask.is_completed}
-              </Text>
-            </View>
-          ))}
-        </View>
-      )}
-    />
+    <View style={tw`flex-1`}>
+      <ScrollView
+        style={tw`flex-1`}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {displayTasks.map((item) => (
+          <View key={`task-${item.id}`} style={tw`mb-4 p-4`}>
+            <Text style={tw`text-black dark:text-white font-bold`}>
+              {item.id}
+            </Text>
+            <Text style={tw`text-black dark:text-white `}>
+              {item.description}
+            </Text>
+            <Text style={tw`text-black dark:text-white `}>
+              {item.created_at}
+            </Text>
+            <Text style={tw`text-black dark:text-white `}>
+              {item.is_completed}
+            </Text>
+            <Text style={tw`text-black dark:text-white `}>
+              {item.updated_at}
+            </Text>
+            {item.subtasks.map((subtask, index) => (
+              <View
+                key={`task-${item.id}-subtask-${subtask.id || index}`}
+                style={tw`ml-4 mt-2`}
+              >
+                <Text style={tw`text-black dark:text-white `}>
+                  {subtask.id}
+                </Text>
+                <Text style={tw`text-black dark:text-white `}>
+                  {subtask.description}
+                </Text>
+                <Text style={tw`text-black dark:text-white `}>
+                  {subtask.is_completed}
+                </Text>
+              </View>
+            ))}
+          </View>
+        ))}
+      </ScrollView>
+      <View style={tw`absolute bottom-6 right-6`}>
+        <TouchableOpacity
+          onPress={navigateToCreate}
+          style={tw`bg-blue-500 p-4 rounded-full shadow-lg`}
+        >
+          <IconSymbol name="plus" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };

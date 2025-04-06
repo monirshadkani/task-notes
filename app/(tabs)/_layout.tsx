@@ -54,15 +54,6 @@ export default function TabLayout() {
             <IconSymbol size={28} name="paperplane.fill" color={color} />
           ),
         }}
-      />{" "}
-      <Tabs.Screen
-        name="tempnotecreate"
-        options={{
-          title: "TempNoteCreate",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
-          ),
-        }}
       />
     </Tabs>
   );
