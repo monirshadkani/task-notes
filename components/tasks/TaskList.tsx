@@ -6,7 +6,6 @@ import { useState, useEffect } from "react";
 import { Task } from "@/types/task.types";
 import { taskService } from "@/services/tasks/taskService";
 import { useTasks } from "@/contexts/TasksContext";
-import { noteService } from "@/services/notes/noteService";
 
 export const TaskList = () => {
   const { tasks, getTasks, setTasks } = useTasks();

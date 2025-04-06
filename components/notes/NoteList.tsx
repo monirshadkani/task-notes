@@ -1,13 +1,5 @@
 //Composant de liste des notes
-import {
-  StyleSheet,
-  Image,
-  Platform,
-  Button,
-  View,
-  Text,
-  StatusBar,
-} from "react-native";
+import { View, Text } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import tw from "twrnc";
 import { useState, useEffect } from "react";

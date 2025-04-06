@@ -1,49 +1,19 @@
 //Écran principal des notes
-import {
-  StyleSheet,
-  Image,
-  Platform,
-  Button,
-  View,
-  Text,
-  StatusBar,
-} from "react-native";
+import { StyleSheet, Button, View } from "react-native";
 import React from "react";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import { useAuth } from "../_layout";
+
 import { NoteList } from "@/components/notes/NoteList";
 
 export default function Index() {
-  const { user, userToken, signOut } = useAuth();
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }
-    >
-      <NoteList />
+    <View>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
+        <ThemedText type="title">My Notes</ThemedText>
       </ThemedView>
-      <ThemedText>
-        {user ? `Welcome, ${user.name}!` : "Welcome to your new app!"}
-      </ThemedText>
-      <ThemedText>
-        {userToken ? "You are authenticated." : "You are not authenticated."}
-      </ThemedText>
-      <ThemedText>
-        <Button title="Sign Out" onPress={signOut} />
-      </ThemedText>
-    </ParallaxScrollView>
+      <NoteList />
+    </View>
   );
 }
 
