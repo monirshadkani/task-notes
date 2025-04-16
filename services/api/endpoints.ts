@@ -39,7 +39,6 @@ export const ENDPOINTS = {
   },
 } as const;
 
-// Example usage:
 // apiClient.get(ENDPOINTS.notes.list)
 // apiClient.post(ENDPOINTS.auth.login, { email, password })
 // apiClient.put(ENDPOINTS.notes.update(noteId), { title, content })

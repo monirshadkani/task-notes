@@ -13,4 +13,7 @@ export const noteService = {
       content: note.content,
     });
   },
+  async deleteNoteApi(noteId: string): Promise<void> {
+    apiClient.delete(ENDPOINTS.notes.delete(noteId));
+  },
 };

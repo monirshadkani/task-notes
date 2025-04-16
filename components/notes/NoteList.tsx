@@ -53,8 +53,8 @@ export const NoteList = () => {
   };
 
   return (
-    <View style={tw`flex-1`}>
-      <View style={tw`flex-row justify-between items-center p-4`}>
+    <View style={tw`flex-1 bg-white dark:bg-gray-900`}>
+      <View style={tw`p-4`}>
         <Text style={tw`text-xl font-bold text-black dark:text-white`}>
           Notes
         </Text>
@@ -63,17 +63,19 @@ export const NoteList = () => {
       <View style={tw`flex-1`}>
         <FlashList
           data={displayNotes}
+          numColumns={2}
           renderItem={({ item }: { item: Note }) => (
             <TouchableOpacity
-              style={tw`p-4 mb-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm`}
+              style={tw`p-3 mb-2 mx-2 w-40 h-40 bg-white text-black border-2 rounded-lg truncate border-gray-100 dark:bg-blue-900 text-white border-blue-800`}
               onPress={() => router.push(`/notes/${item.id}`)}
             >
               <Text style={tw`text-lg font-bold text-black dark:text-white`}>
                 {item.title}
               </Text>
+
               <Text
-                style={tw`text-gray-600 dark:text-gray-300 mt-1`}
-                numberOfLines={2}
+                style={tw`text-gray-700 dark:text-gray-300 text-sm mt-2`}
+                numberOfLines={3}
               >
                 {item.content}
               </Text>
@@ -90,7 +92,7 @@ export const NoteList = () => {
         />
       </View>
 
-      <View style={tw`absolute bottom-6 right-6`}>
+      <View style={tw`absolute bottom-5 right-5`}>
         <TouchableOpacity
           onPress={navigateToCreate}
           style={tw`bg-blue-500 p-4 rounded-full shadow-lg`}

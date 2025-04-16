@@ -1,7 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import { User } from "../auth/auth.types";
 import { Note } from "@/types/note.types";
 import { Task } from "@/types/task.types";
+import { Category } from "@/types";
 
 const STORAGE_KEYS = {
   USER_TOKEN: "userToken",
@@ -10,6 +12,9 @@ const STORAGE_KEYS = {
   CATEGORIES: "categories",
   TASKS: "tasks",
 } as const;
+
+//change for secure storage for auth instead of asyncstorage
+//maybe use drizzle to store the rest
 
 export const storageService = {
   async setUserToken(token: string): Promise<void> {
@@ -66,6 +71,26 @@ export const storageService = {
 
   async getTasksStorage(): Promise<Task[]> {
     const data = await AsyncStorage.getItem(STORAGE_KEYS.TASKS);
+    if (data) {
+      try {
+        return JSON.parse(data);
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
+    }
+    return [];
+  },
+
+  async setCategoriesStorage(categories: Category[]): Promise<void> {
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.CATEGORIES,
+      JSON.stringify(categories)
+    );
+  },
+
+  async getCategoriesStorage(): Promise<Category[]> {
+    const data = await AsyncStorage.getItem(STORAGE_KEYS.CATEGORIES);
     if (data) {
       try {
         return JSON.parse(data);

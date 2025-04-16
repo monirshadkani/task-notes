@@ -37,6 +37,7 @@ export const apiClient = {
 
   get: <T>(endpoint: string) => apiClient.request<T>(endpoint),
 
+  //add xrequested with etc for post
   post: <T>(endpoint: string, body: any) =>
     apiClient.request<T>(endpoint, {
       method: "POST",

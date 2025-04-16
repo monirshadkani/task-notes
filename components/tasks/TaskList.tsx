@@ -65,37 +65,39 @@ export const TaskList = () => {
       >
         {displayTasks.map((item) => (
           <View key={`task-${item.id}`} style={tw`mb-4 p-4`}>
-            <Text style={tw`text-black dark:text-white font-bold`}>
-              {item.id}
-            </Text>
-            <Text style={tw`text-black dark:text-white `}>
-              {item.description}
-            </Text>
-            <Text style={tw`text-black dark:text-white `}>
-              {item.created_at}
-            </Text>
-            <Text style={tw`text-black dark:text-white `}>
-              {item.is_completed}
-            </Text>
-            <Text style={tw`text-black dark:text-white `}>
-              {item.updated_at}
-            </Text>
-            {item.subtasks.map((subtask, index) => (
-              <View
-                key={`task-${item.id}-subtask-${subtask.id || index}`}
-                style={tw`ml-4 mt-2`}
-              >
-                <Text style={tw`text-black dark:text-white `}>
-                  {subtask.id}
-                </Text>
-                <Text style={tw`text-black dark:text-white `}>
-                  {subtask.description}
-                </Text>
-                <Text style={tw`text-black dark:text-white `}>
-                  {subtask.is_completed}
-                </Text>
-              </View>
-            ))}
+            <TouchableOpacity onPress={() => router.push(`/tasks/${item.id}`)}>
+              <Text style={tw`text-black dark:text-white font-bold`}>
+                {item.id}
+              </Text>
+              <Text style={tw`text-black dark:text-white `}>
+                {item.description}
+              </Text>
+              <Text style={tw`text-black dark:text-white `}>
+                {item.created_at}
+              </Text>
+              <Text style={tw`text-black dark:text-white `}>
+                {item.is_completed}
+              </Text>
+              <Text style={tw`text-black dark:text-white `}>
+                {item.updated_at}
+              </Text>
+              {item.subtasks.map((subtask, index) => (
+                <View
+                  key={`task-${item.id}-subtask-${subtask.id || index}`}
+                  style={tw`ml-4 mt-2`}
+                >
+                  <Text style={tw`text-black dark:text-white `}>
+                    {subtask.id}
+                  </Text>
+                  <Text style={tw`text-black dark:text-white `}>
+                    {subtask.description}
+                  </Text>
+                  <Text style={tw`text-black dark:text-white `}>
+                    {subtask.is_completed}
+                  </Text>
+                </View>
+              ))}
+            </TouchableOpacity>
           </View>
         ))}
       </ScrollView>
