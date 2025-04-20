@@ -1,120 +1,177 @@
 //Page d'édition de note
-import { Text, View, ScrollView, TouchableOpacity } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  ScrollView,
+} from "react-native";
 import tw from "twrnc";
-import { useNotes } from "@/contexts/NotesContext";
 import { Note } from "@/types/note.types";
 import { noteService } from "@/services/notes/noteService";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useEffect } from "react";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import { useCategories } from "@/contexts/CategoriesContect";
+import { Category } from "@/types/category.types";
+import { useNotes } from "@/contexts/NotesContext";
 
-export default function NoteEdit() {
+export default function EditNote() {
   const noteId = useLocalSearchParams().id;
-  const { getNotes, deleteNote } = useNotes();
+  const { notes, updateNote } = useNotes();
+  const { categories } = useCategories();
   const [note, setNote] = useState<Note | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [editedNote, setEditedNote] = useState<Partial<Note>>({});
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
 
   useEffect(() => {
-    let isMounted = true;
+    const foundNote = notes.find((n) => n.id === Number(noteId));
+    if (foundNote) {
+      setNote(foundNote);
+      setEditedNote({
+        title: foundNote.title,
+        content: foundNote.content,
+        categories: foundNote.categories,
+      });
+      setSelectedCategories(foundNote.categories);
+    }
+  }, [noteId, notes]);
 
-    const fetchNote = async () => {
-      try {
-        const notes = await getNotes();
-        if (isMounted) {
-          const foundNote = notes.find(
-            (note: Note) => note.id === Number(noteId)
-          );
-          setNote(foundNote as Note);
-        }
-      } catch (error) {
-        console.error("Error fetching notes:", error);
+  const toggleCategory = (category: Category) => {
+    setSelectedCategories((prev) => {
+      const isSelected = prev.some((c) => c.id === category.id);
+      if (isSelected) {
+        return prev.filter((c) => c.id !== category.id);
+      } else {
+        return [...prev, category];
       }
-    };
+    });
+  };
 
-    fetchNote();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [noteId]);
-
-  const handleDeleteNote = async () => {
-    if (isDeleting) return;
-    setIsDeleting(true);
+  const handleSubmit = async () => {
     try {
-      console.log("Deleting note with ID:", noteId);
-      if (note) {
-        await deleteNote(noteId as string);
-        router.replace("/");
-      }
+      if (!note) return;
+
+      const updatedNote = {
+        title: editedNote.title,
+        content: editedNote.content,
+        categories: selectedCategories.map((category) => ({
+          ...category,
+          pivot: {
+            note_id: note.id,
+            category_id: category.id,
+          },
+        })),
+      };
+
+      await updateNote(note.id.toString(), updatedNote);
+      router.back();
     } catch (error) {
-      console.error("Error deleting note:", error);
-    } finally {
-      setIsDeleting(false);
+      console.error("Failed to update note:", error);
     }
   };
 
-  return (
-    <SafeAreaView
-      style={tw`flex-1 p-4 bg-white dark:bg-gray-900 border items-center border-red-500`}
-    >
-      <View
-        style={tw` justify-between items-center border border-blue-500 w-[50%] h-[90%]`}
-      >
+  if (!note) {
+    return (
+      <View style={tw`flex-1 p-4 bg-white dark:bg-gray-900`}>
         <Text style={tw`text-xl font-bold text-black dark:text-white`}>
-          {note?.title}
+          Loading...
         </Text>
+      </View>
+    );
+  }
 
-        {note?.categories && note.categories.length > 0 && (
-          <View style={tw`flex-row flex-wrap mt-2`}>
-            {note.categories.map((category) => (
-              <View
+  return (
+    <View style={tw`flex-1 bg-white dark:bg-gray-900`}>
+      <View
+        style={tw`flex-row justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700`}
+      >
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={tw`text-blue-500`}>Cancel</Text>
+        </TouchableOpacity>
+        <Text style={tw`text-xl font-bold text-black dark:text-white`}>
+          Edit Note
+        </Text>
+        <TouchableOpacity onPress={handleSubmit}>
+          <Text style={tw`text-blue-500`}>Save</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView style={tw`flex-1 p-4`}>
+        <View style={tw`mb-4`}>
+          <Text
+            style={tw`text-sm font-medium mb-2 text-gray-700 dark:text-gray-300`}
+          >
+            Title
+          </Text>
+          <TextInput
+            style={tw`w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white`}
+            onChangeText={(text) =>
+              setEditedNote((prev) => ({ ...prev, title: text }))
+            }
+            value={editedNote.title}
+            placeholder="Enter title"
+            placeholderTextColor="#666"
+          />
+        </View>
+
+        <View style={tw`mb-6`}>
+          <Text
+            style={tw`text-sm font-medium mb-2 text-gray-700 dark:text-gray-300`}
+          >
+            Content
+          </Text>
+          <TextInput
+            style={tw`w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white min-h-[200px]`}
+            onChangeText={(text) =>
+              setEditedNote((prev) => ({ ...prev, content: text }))
+            }
+            value={editedNote.content}
+            placeholder="Enter content"
+            placeholderTextColor="#666"
+            multiline
+            textAlignVertical="top"
+          />
+        </View>
+
+        <View style={tw`mb-6`}>
+          <Text
+            style={tw`text-sm font-medium mb-2 text-gray-700 dark:text-gray-300`}
+          >
+            Categories
+          </Text>
+          <View style={tw`flex-row flex-wrap`}>
+            {categories.map((category) => (
+              <TouchableOpacity
                 key={category.id}
-                style={tw`flex-row items-center mr-2 mb-1`}
+                onPress={() => toggleCategory(category)}
+                style={[
+                  tw`flex-row items-center mr-2 mb-2 px-3 py-2 rounded-lg`,
+                  selectedCategories.some((c) => c.id === category.id)
+                    ? tw`bg-blue-100 dark:bg-blue-900`
+                    : tw`bg-gray-100 dark:bg-gray-800`,
+                ]}
               >
                 <View
                   style={[
-                    tw`w-3 h-3 rounded-full mr-1`,
+                    tw`w-3 h-3 rounded-full mr-2`,
                     { backgroundColor: category.color },
                   ]}
                 />
-                <Text style={tw`text-sm text-gray-700 dark:text-gray-300`}>
+                <Text
+                  style={[
+                    tw`text-sm`,
+                    selectedCategories.some((c) => c.id === category.id)
+                      ? tw`text-blue-700 dark:text-blue-300`
+                      : tw`text-gray-700 dark:text-gray-300`,
+                  ]}
+                >
                   {category.name}
                 </Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
-        )}
-
-        <ScrollView style={tw`mt-4`}>
-          {note?.content ? (
-            <Text
-              style={tw`text-gray-700 dark:text-gray-300 text-base leading-6`}
-            >
-              {note.content}
-            </Text>
-          ) : (
-            <Text style={tw`text-gray-500 dark:text-gray-400`}>No content</Text>
-          )}
-        </ScrollView>
-        <View style={tw`mt-4`}>
-          <Text style={tw`text-xs text-gray-500 dark:text-gray-400`}>
-            Created at: {note?.created_at}
-          </Text>
-          <Text style={tw`text-xs text-gray-500 dark:text-gray-400 mt-2`}>
-            Updated at: {note?.updated_at}
-          </Text>
         </View>
-
-        <TouchableOpacity onPress={handleDeleteNote}>
-          <View
-            style={tw`bg-red-500 p-4 rounded-lg mt-4 flex-row w-40 justify-center items-center`}
-          >
-            <Text style={tw`text-white text-lg font-bold `}>Delete</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+      </ScrollView>
+    </View>
   );
 }

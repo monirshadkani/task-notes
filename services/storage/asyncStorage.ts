@@ -18,102 +18,140 @@ const STORAGE_KEYS = {
 
 export const storageService = {
   async setUserToken(token: string): Promise<void> {
-    await AsyncStorage.setItem(STORAGE_KEYS.USER_TOKEN, token);
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.USER_TOKEN, token);
+    } catch (error) {
+      console.error("Error setting user token:", error);
+      throw error;
+    }
   },
 
   async getUserToken(): Promise<string | null> {
-    return AsyncStorage.getItem(STORAGE_KEYS.USER_TOKEN);
+    try {
+      return await AsyncStorage.getItem(STORAGE_KEYS.USER_TOKEN);
+    } catch (error) {
+      console.error("Error getting user token:", error);
+      return null;
+    }
   },
 
   async setUserData(user: User): Promise<void> {
-    await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+    } catch (error) {
+      console.error("Error setting user data:", error);
+      throw error;
+    }
   },
 
   async getUserData(): Promise<User | null> {
-    const data = await AsyncStorage.getItem(STORAGE_KEYS.USER_DATA);
-    if (data) {
-      try {
-        return JSON.parse(data);
-      } catch (error) {
-        console.error(error);
-        return null;
-      }
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.USER_DATA);
+      if (!data) return null;
+      return JSON.parse(data);
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+      return null;
     }
-    return null;
   },
 
   async removeUserData(): Promise<void> {
-    await AsyncStorage.multiRemove([
-      STORAGE_KEYS.USER_TOKEN,
-      STORAGE_KEYS.USER_DATA,
-    ]);
+    try {
+      await AsyncStorage.multiRemove([
+        STORAGE_KEYS.USER_TOKEN,
+        STORAGE_KEYS.USER_DATA,
+      ]);
+    } catch (error) {
+      console.error("Error removing user data:", error);
+      throw error;
+    }
   },
 
   async setNotesStorage(notes: Note[]): Promise<void> {
-    await AsyncStorage.setItem(STORAGE_KEYS.NOTES, JSON.stringify(notes));
-  },
-  async getNotesStorage(): Promise<Note[]> {
-    const data = await AsyncStorage.getItem(STORAGE_KEYS.NOTES);
-    if (data) {
-      try {
-        return JSON.parse(data);
-      } catch (error) {
-        console.error(error);
-        return [];
-      }
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.NOTES, JSON.stringify(notes));
+    } catch (error) {
+      console.error("Error setting notes:", error);
+      throw error;
     }
-    return [];
+  },
+
+  async getNotesStorage(): Promise<Note[]> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.NOTES);
+      if (!data) return [];
+      const parsed = JSON.parse(data);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.error("Error parsing notes:", error);
+      return [];
+    }
   },
 
   async setTasksStorage(tasks: Task[]): Promise<void> {
-    await AsyncStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
+    } catch (error) {
+      console.error("Error setting tasks:", error);
+      throw error;
+    }
   },
 
   async getTasksStorage(): Promise<Task[]> {
-    const data = await AsyncStorage.getItem(STORAGE_KEYS.TASKS);
-    if (data) {
-      try {
-        return JSON.parse(data);
-      } catch (error) {
-        console.error(error);
-        return [];
-      }
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.TASKS);
+      if (!data) return [];
+      const parsed = JSON.parse(data);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.error("Error parsing tasks:", error);
+      return [];
     }
-    return [];
   },
 
   async setCategoriesStorage(categories: Category[]): Promise<void> {
-    await AsyncStorage.setItem(
-      STORAGE_KEYS.CATEGORIES,
-      JSON.stringify(categories)
-    );
+    try {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.CATEGORIES,
+        JSON.stringify(categories)
+      );
+    } catch (error) {
+      console.error("Error setting categories:", error);
+      throw error;
+    }
   },
 
   async getCategoriesStorage(): Promise<Category[]> {
-    const data = await AsyncStorage.getItem(STORAGE_KEYS.CATEGORIES);
-    if (data) {
-      try {
-        return JSON.parse(data);
-      } catch (error) {
-        console.error(error);
-        return [];
-      }
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.CATEGORIES);
+      if (!data) return [];
+      const parsed = JSON.parse(data);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.error("Error parsing categories:", error);
+      return [];
     }
-    return [];
   },
 
   async refreshApp(): Promise<void> {
     try {
       await AsyncStorage.multiRemove([
         STORAGE_KEYS.NOTES,
-        STORAGE_KEYS.TASKS,
         STORAGE_KEYS.CATEGORIES,
+        STORAGE_KEYS.TASKS,
       ]);
     } catch (error) {
-      console.error(error);
+      console.error("Error refreshing app:", error);
+      throw error;
     }
   },
+
   async clearAll(): Promise<void> {
-    await AsyncStorage.clear();
+    try {
+      await AsyncStorage.clear();
+    } catch (error) {
+      console.error("Error clearing storage:", error);
+      throw error;
+    }
   },
 };

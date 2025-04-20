@@ -8,9 +8,11 @@ import { categoryService } from "@/services/categories/categoryService";
 import { router } from "expo-router";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export const CategoryList = () => {
   const { categories } = useCategories();
+  const { isDarkMode } = useTheme();
 
   return (
     <View style={tw`flex-row px-4 py-2 bg-white dark:bg-gray-900`}>

@@ -2,9 +2,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { NotesProvider } from "@/contexts/NotesContext";
 import { TasksProvider } from "@/contexts/TasksContext";
 import { CategoriesProvider } from "@/contexts/CategoriesContect";
-import { ThemeProvider } from "@react-navigation/native";
-import { DarkTheme, DefaultTheme } from "@react-navigation/native";
-import { useFonts } from "expo-font";
+import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -12,13 +10,14 @@ import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 import "react-native-reanimated";
 import tw, { useDeviceContext } from "twrnc";
+import { useFonts } from "expo-font";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function AppContent() {
+  const { isDarkMode } = useTheme();
   const colorScheme = useColorScheme();
-  // Initialiser le contexte du device pour twrnc
   useDeviceContext(tw);
 
   const [loaded] = useFonts({
@@ -36,23 +35,78 @@ export default function RootLayout() {
   }
 
   return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: {
+          backgroundColor: isDarkMode
+            ? tw.color("gray-900")
+            : tw.color("white"),
+        },
+        navigationBarColor: isDarkMode
+          ? tw.color("gray-900")
+          : tw.color("white"),
+        statusBarStyle: isDarkMode ? "light" : "dark",
+      }}
+    >
+      <Stack.Screen
+        name="(tabs)"
+        options={{
+          headerShown: false,
+          contentStyle: {
+            backgroundColor: isDarkMode
+              ? tw.color("gray-900")
+              : tw.color("white"),
+          },
+        }}
+      />
+      <Stack.Screen
+        name="auth"
+        options={{
+          contentStyle: {
+            backgroundColor: isDarkMode
+              ? tw.color("gray-900")
+              : tw.color("white"),
+          },
+        }}
+      />
+      <Stack.Screen
+        name="+not-found"
+        options={{
+          contentStyle: {
+            backgroundColor: isDarkMode
+              ? tw.color("gray-900")
+              : tw.color("white"),
+          },
+        }}
+      />
+      <Stack.Screen
+        name="settings"
+        options={{
+          contentStyle: {
+            backgroundColor: isDarkMode
+              ? tw.color("gray-900")
+              : tw.color("white"),
+          },
+        }}
+      />
+    </Stack>
+  );
+}
+
+export default function RootLayout() {
+  return (
     <AuthProvider>
-      <CategoriesProvider>
-        <NotesProvider>
-          <TasksProvider>
-            <ThemeProvider
-              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-            >
-              <Stack>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="auth" />
-                <Stack.Screen name="+not-found" />
-              </Stack>
+      <ThemeProvider>
+        <TasksProvider>
+          <NotesProvider>
+            <CategoriesProvider>
+              <AppContent />
               <StatusBar style="auto" />
-            </ThemeProvider>
-          </TasksProvider>
-        </NotesProvider>
-      </CategoriesProvider>
+            </CategoriesProvider>
+          </NotesProvider>
+        </TasksProvider>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

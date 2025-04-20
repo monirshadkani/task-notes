@@ -1,6 +1,11 @@
 import { API_URL } from "@/services/api/endpoints";
 import { storageService } from "../storage/asyncStorage";
 
+interface ApiError {
+  message: string;
+  status?: number;
+}
+
 export const apiClient = {
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${API_URL}${endpoint}`;
@@ -19,25 +24,44 @@ export const apiClient = {
         headers,
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw {
+          message: errorData.message || "Something went wrong",
+          status: response.status,
+        } as ApiError;
+      }
+
       const data = await response.json();
 
-      if (!response.ok) {
-        throw { message: data.message || "Something went wrong" };
-      }
-
       if (endpoint === "/login") {
-        return data;
+        return data as T;
       }
 
-      return data.data;
+      if (data && typeof data === "object") {
+        if ("data" in data) {
+          return data.data as T;
+        }
+        if (Array.isArray(data)) {
+          return data as T;
+        }
+        return data as T;
+      }
+
+      console.warn("Unexpected API response format:", data);
+      return data as T;
     } catch (error) {
-      throw { message: "Failed to connect to the server" };
+      console.error("API request failed:", error);
+      const apiError = error as ApiError;
+      throw {
+        message: apiError.message || "Failed to connect to the server",
+        status: apiError.status,
+      } as ApiError;
     }
   },
 
   get: <T>(endpoint: string) => apiClient.request<T>(endpoint),
 
-  //add xrequested with etc for post
   post: <T>(endpoint: string, body: any) =>
     apiClient.request<T>(endpoint, {
       method: "POST",
@@ -47,6 +71,12 @@ export const apiClient = {
   put: <T>(endpoint: string, body: any) =>
     apiClient.request<T>(endpoint, {
       method: "PUT",
+      body: JSON.stringify(body),
+    }),
+
+  patch: <T>(endpoint: string, body: any) =>
+    apiClient.request<T>(endpoint, {
+      method: "PATCH",
       body: JSON.stringify(body),
     }),
 

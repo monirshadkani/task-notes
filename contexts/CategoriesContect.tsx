@@ -27,35 +27,48 @@ export const CategoriesProvider = ({
   const [categories, setCategoriesState] = useState<Category[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const refreshCategories = async () => {
-    try {
-      const apiCategories = await categoryService.getCategoriesApi();
-      await storageService.setCategoriesStorage(apiCategories);
-      setCategoriesState(apiCategories);
-    } catch (error) {
-      console.error("Failed to refresh categories:", error);
-    }
-  };
-
   useEffect(() => {
     const initializeCategories = async () => {
       if (isInitialized) return;
 
       try {
+        // First try to get from local storage
         const storedCategories = await storageService.getCategoriesStorage();
-        if (storedCategories.length === 0) {
-          await refreshCategories();
-        } else {
+        if (storedCategories && storedCategories.length > 0) {
           setCategoriesState(storedCategories);
+        } else {
+          // Only if storage is empty, try API
+          const apiCategories = await categoryService.getCategoriesApi();
+          if (apiCategories && apiCategories.length > 0) {
+            await storageService.setCategoriesStorage(apiCategories);
+            setCategoriesState(apiCategories);
+          }
         }
         setIsInitialized(true);
       } catch (error) {
-        console.error("Failed to fetch categories:", error);
+        console.error("Failed to initialize categories:", error);
+        setCategoriesState([]);
+        setIsInitialized(true);
       }
     };
 
     initializeCategories();
   }, [isInitialized]);
+
+  const refreshCategories = async () => {
+    try {
+      const apiCategories = await categoryService.getCategoriesApi();
+      if (apiCategories && apiCategories.length > 0) {
+        await storageService.setCategoriesStorage(apiCategories);
+        setCategoriesState(apiCategories);
+      } else {
+        setCategoriesState([]);
+      }
+    } catch (error) {
+      console.error("Failed to refresh categories:", error);
+      setCategoriesState([]);
+    }
+  };
 
   const setCategories = async (categories: Category[]) => {
     await storageService.setCategoriesStorage(categories);

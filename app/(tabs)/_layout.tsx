@@ -2,38 +2,41 @@ import { Tabs } from "expo-router";
 import React from "react";
 import { Platform } from "react-native";
 import tw from "twrnc";
+import { useTheme } from "@/contexts/ThemeContext";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { isDarkMode } = useTheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: isDarkMode ? "#60A5FA" : "#3B82F6",
+        tabBarInactiveTintColor: isDarkMode ? "#9CA3AF" : "#6B7280",
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: "absolute",
-          },
-          default: {},
-        }),
+        tabBarStyle: {
+          backgroundColor: isDarkMode ? "#1F2937" : "#FFFFFF",
+          borderTopColor: isDarkMode ? "#374151" : "#E5E7EB",
+          ...Platform.select({
+            ios: {
+              position: "absolute",
+            },
+            default: {},
+          }),
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Notes",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+          tabBarIcon: ({ color, size }) => (
+            <IconSymbol name="note.text" size={size} color={color} />
           ),
         }}
       />
@@ -41,8 +44,8 @@ export default function TabLayout() {
         name="tasks"
         options={{
           title: "Tasks",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+          tabBarIcon: ({ color, size }) => (
+            <IconSymbol name="checklist" size={size} color={color} />
           ),
         }}
       />
@@ -50,8 +53,8 @@ export default function TabLayout() {
         name="settings"
         options={{
           title: "Settings",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+          tabBarIcon: ({ color, size }) => (
+            <IconSymbol name="gear" size={size} color={color} />
           ),
         }}
       />
