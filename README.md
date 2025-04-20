@@ -1,50 +1,85 @@
-# Welcome to your Expo app 👋
+# Task Notes / Notes de Tâches
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native application for managing tasks and notes.  
+Une application React Native pour gérer les tâches et les notes.
 
-## Get started
+## Prerequisites / Prérequis
 
-1. Install dependencies
+- Node.js (v18 or higher / v18 ou supérieur)
+- npm or yarn
+- Expo CLI
+- React Native development environment set up / Environnement de développement React Native configuré
 
-   ```bash
-   npm install
-   ```
+## Installation
 
-2. Start the app
-
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+1. Clone the repository / Cloner le dépôt :
 
 ```bash
-npm run reset-project
+git clone https://github.com/yourusername/task-notes.git
+cd task-notes
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. Install dependencies / Installer les dépendances :
 
-## Learn more
+```bash
+npm install
+# or
+yarn install
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+3. Create a `.env` file in the root directory with the following variables / Créer un fichier `.env` à la racine avec les variables suivantes :
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```env
+API_URL=your_api_url_here
+```
 
-## Join the community
+4. Start the development server / Démarrer le serveur de développement :
 
-Join our community of developers creating universal apps.
+```bash
+npm start
+# or
+yarn start
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Environment Variables / Variables d'Environnement
+
+Create a `.env` file in the root directory with the following variables / Créer un fichier `.env` à la racine avec les variables suivantes :
+
+- `API_URL`: The base URL for your API (e.g., `http://localhost:3000` or your production API URL) / L'URL de base de votre API (ex: `http://localhost:3000` ou votre URL de production)
+
+## Project Structure / Structure du Projet
+
+```
+task-notes/
+├── app/                    # Main application code / Code principal de l'application
+│   ├── auth/              # Authentication screens / Écrans d'authentification
+│   ├── (tabs)/            # Tab navigation screens / Écrans de navigation par onglets
+│   └── _layout.tsx        # Root layout / Layout racine
+├── components/            # Reusable components / Composants réutilisables
+├── services/              # API and other services / API et autres services
+├── contexts/              # React contexts / Contextes React
+├── hooks/                 # Custom hooks / Hooks personnalisés
+├── utils/                 # Utility functions / Fonctions utilitaires
+└── types/                 # TypeScript type definitions / Définitions de types TypeScript
+```
+
+## Features / Fonctionnalités
+
+- User authentication / Authentification utilisateur
+- Task management / Gestion des tâches
+- Note taking / Prise de notes
+- QR code scanning / Scan de code QR
+- Dark mode support / Support du mode sombre
+
+## Contributing / Contribution
+
+1. Fork the repository / Forker le dépôt
+2. Create your feature branch / Créer votre branche de fonctionnalité (`git checkout -b feature/amazing-feature`)
+3. Commit your changes / Commiter vos changements (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch / Pousser vers la branche (`git push origin feature/amazing-feature`)
+5. Open a Pull Request / Ouvrir une Pull Request
+
+## License / Licence
+
+This project is licensed under the MIT License - see the LICENSE file for details.  
+Ce projet est sous licence MIT - voir le fichier LICENSE pour plus de détails.
