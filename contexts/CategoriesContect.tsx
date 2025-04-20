@@ -32,12 +32,10 @@ export const CategoriesProvider = ({
       if (isInitialized) return;
 
       try {
-        // First try to get from local storage
         const storedCategories = await storageService.getCategoriesStorage();
         if (storedCategories && storedCategories.length > 0) {
           setCategoriesState(storedCategories);
         } else {
-          // Only if storage is empty, try API
           const apiCategories = await categoryService.getCategoriesApi();
           if (apiCategories && apiCategories.length > 0) {
             await storageService.setCategoriesStorage(apiCategories);

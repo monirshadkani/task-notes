@@ -32,7 +32,6 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         if (savedTheme) {
           setTheme(savedTheme as Theme);
         } else {
-          // If no saved theme, use system preference
           setTheme(systemColorScheme || "light");
         }
       } catch (error) {

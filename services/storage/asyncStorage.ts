@@ -19,9 +19,6 @@ const STORAGE_KEYS = {
   TASKS: "tasks",
 } as const;
 
-//change for secure storage for auth instead of asyncstorage
-//maybe use drizzle to store the rest
-
 export const storageService = {
   async setUserToken(token: string): Promise<void> {
     try {
@@ -162,14 +159,12 @@ export const storageService = {
 
   async refreshApp(): Promise<void> {
     try {
-      // Clear only the data that needs to be refreshed
       const keysToRemove = [
         STORAGE_KEYS.NOTES,
         STORAGE_KEYS.CATEGORIES,
         STORAGE_KEYS.TASKS,
       ];
 
-      // Use multiRemove for better performance
       await AsyncStorage.multiRemove(keysToRemove);
     } catch (error) {
       console.error("Error refreshing app:", error);

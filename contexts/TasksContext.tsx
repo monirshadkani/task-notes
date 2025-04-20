@@ -35,7 +35,6 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const apiTasks = await taskService.getTasksApi();
       if (apiTasks && apiTasks.length > 0) {
-        // Enrich tasks with note data
         const enrichedTasks = apiTasks.map((task) => {
           if (task.note_id) {
             const associatedNote = notes.find(

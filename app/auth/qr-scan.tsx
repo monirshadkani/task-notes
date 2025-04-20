@@ -36,7 +36,6 @@ export default function QRScanScreen() {
     setLoading(true);
     setDebug(`QR Code scanné: ${data.substring(0, 50)}...\n`);
 
-    // Vérifier si le QR code contient un URL avec le token
     if (!data.includes("/auth/qr-login/")) {
       setDebug((prev) => prev + "Format de QR code invalide!\n");
       Alert.alert(
@@ -51,7 +50,6 @@ export default function QRScanScreen() {
     try {
       setDebug((prev) => prev + `Tentative de connexion avec le QR code...\n`);
 
-      // Faire la requête à l'API
       const response = await fetch(data, {
         method: "GET",
         headers: {
@@ -61,7 +59,6 @@ export default function QRScanScreen() {
 
       setDebug((prev) => prev + `Statut HTTP: ${response.status}\n`);
 
-      // Récupérer d'abord la réponse en texte brut
       const rawText = await response.text();
       setDebug(
         (prev) =>
@@ -74,7 +71,6 @@ export default function QRScanScreen() {
 
       let responseData;
       try {
-        // Essayer de parser le texte en JSON
         responseData = JSON.parse(rawText);
       } catch (parseError) {
         setDebug((prev) => prev + `Erreur de parsing JSON: ${parseError}\n`);
@@ -90,10 +86,7 @@ export default function QRScanScreen() {
 
       setDebug((prev) => prev + "Authentification par QR code réussie!\n");
 
-      // Connexion avec les données reçues
       await signIn(responseData.access_token, responseData.user);
-
-      // La redirection sera gérée par le contexte d'authentification
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Une erreur est survenue";
@@ -112,7 +105,6 @@ export default function QRScanScreen() {
   };
 
   if (!permission) {
-    // Les permissions de caméra sont en cours de chargement
     return (
       <View style={tw`flex-1 bg-white justify-center p-5`}>
         <Text>Vérification des permissions caméra...</Text>
@@ -121,7 +113,6 @@ export default function QRScanScreen() {
   }
 
   if (!permission.granted) {
-    // Les permissions de caméra ne sont pas accordées
     return (
       <View style={tw`flex-1 bg-white justify-center p-5`}>
         <Text style={tw`text-red-500 text-lg text-center`}>

@@ -10,16 +10,13 @@ import {
 import tw from "twrnc";
 import { useState, useEffect } from "react";
 import { Task } from "@/types/task.types";
-import { taskService } from "@/services/tasks/taskService";
 import { useTasks } from "@/contexts/TasksContext";
 import { useNotes } from "@/contexts/NotesContext";
 import React from "react";
-import { router } from "expo-router";
 import { IconSymbol } from "../ui/IconSymbol";
 import { FlashList } from "@shopify/flash-list";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 
 export const TaskList = () => {
   const [refreshing, setRefreshing] = useState(false);

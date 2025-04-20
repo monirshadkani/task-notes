@@ -41,7 +41,6 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={tw`flex-1 bg-white dark:bg-gray-900`}>
       <View style={tw`flex-1 px-8 py-12`}>
-        {/* Header */}
         <View style={tw`items-center mb-16`}>
           <IconSymbol name="note.text" size={72} color="#4B5563" />
           <Text

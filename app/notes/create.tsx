@@ -1,5 +1,5 @@
 // Page de création de note
-//temporary note create page
+
 import React, { useState, useEffect } from "react";
 import {
   View,

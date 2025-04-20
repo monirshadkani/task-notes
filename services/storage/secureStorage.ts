@@ -103,11 +103,10 @@ export const secureStorage = {
         sessionStorage.removeItem(STORAGE_KEYS.USER_DATA);
         sessionStorage.removeItem(STORAGE_KEYS.TOKEN_EXPIRATION);
       } else {
-        // @ts-ignore - expo-secure-store types are incorrect
         await SecureStore.deleteItemAsync(STORAGE_KEYS.AUTH_TOKEN);
-        // @ts-ignore - expo-secure-store types are incorrect
+
         await SecureStore.deleteItemAsync(STORAGE_KEYS.USER_DATA);
-        // @ts-ignore - expo-secure-store types are incorrect
+
         await SecureStore.deleteItemAsync(STORAGE_KEYS.TOKEN_EXPIRATION);
       }
     } catch (error) {

@@ -33,12 +33,10 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
       if (isInitialized) return;
 
       try {
-        // First try to get from local storage
         const storedNotes = await storageService.getNotesStorage();
         if (storedNotes && storedNotes.length > 0) {
           setNotesState(storedNotes);
         } else {
-          // Only if storage is empty, try API
           const apiNotes = await noteService.getNotesApi();
           if (apiNotes && apiNotes.length > 0) {
             await storageService.setNotesStorage(apiNotes);
@@ -73,12 +71,10 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
 
   const deleteNote = async (id: string) => {
     try {
-      // Update local state first
       const updatedNotes = notes.filter((note) => note.id.toString() !== id);
       await storageService.setNotesStorage(updatedNotes);
       setNotesState(updatedNotes);
 
-      // Then sync with API in the background
       noteService.deleteNoteApi(id).catch((error) => {
         console.error("Failed to sync delete with API:", error);
       });
@@ -90,14 +86,12 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateNote = async (id: string, note: Partial<Note>) => {
     try {
-      // Update local state first
       const updatedNotes = notes.map((n) =>
         n.id.toString() === id ? { ...n, ...note } : n
       );
       await storageService.setNotesStorage(updatedNotes);
       setNotesState(updatedNotes);
 
-      // Then sync with API in the background
       noteService.updateNoteApi(id, note).catch((error) => {
         console.error("Failed to sync update with API:", error);
       });
