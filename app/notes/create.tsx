@@ -1,6 +1,6 @@
 // Page de création de note
 //temporary note create page
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -9,13 +9,38 @@ import {
   ScrollView,
 } from "react-native";
 import tw from "twrnc";
-import { Note } from "@/types";
+import { Note } from "@/types/note.types";
 import { noteService } from "@/services/notes/noteService";
 import { router } from "expo-router";
+import { useCategories } from "@/contexts/CategoriesContect";
+import { Category } from "@/types/category.types";
+
+type CreateNotePayload = {
+  title: string;
+  content: string;
+  categories: number[];
+};
 
 export default function CreateNote() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const { getCategories } = useCategories();
+  const [availableCategories, setAvailableCategories] = useState<Category[]>(
+    []
+  );
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categories = await getCategories();
+        setAvailableCategories(categories);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleTitleChange = (text: string) => {
     setTitle(text);
@@ -25,17 +50,30 @@ export default function CreateNote() {
     setContent(text);
   };
 
+  const toggleCategory = (category: Category) => {
+    setSelectedCategories((prev) => {
+      const isSelected = prev.some((c) => c.id === category.id);
+      if (isSelected) {
+        return prev.filter((c) => c.id !== category.id);
+      } else {
+        return [...prev, category];
+      }
+    });
+  };
+
   const handleSubmit = async () => {
     try {
-      const newNote: Partial<Note> = {
+      const newNote: CreateNotePayload = {
         title: title,
         content: content,
+        categories: selectedCategories.map((category) => category.id),
       };
 
-      await noteService.setNotesApi(newNote as Note);
+      await noteService.setNotesApi(newNote as unknown as Note);
       setTitle("");
       setContent("");
-      router.back();
+      setSelectedCategories([]);
+      router.replace("/");
     } catch (error) {
       console.error("Failed to create note:", error);
     }
@@ -82,6 +120,45 @@ export default function CreateNote() {
             multiline
             textAlignVertical="top"
           />
+        </View>
+
+        <View style={tw`mb-6`}>
+          <Text
+            style={tw`text-sm font-medium mb-2 text-gray-700 dark:text-gray-300`}
+          >
+            Categories
+          </Text>
+          <View style={tw`flex-row flex-wrap`}>
+            {availableCategories.map((category) => (
+              <TouchableOpacity
+                key={category.id}
+                onPress={() => toggleCategory(category)}
+                style={[
+                  tw`flex-row items-center mr-2 mb-2 px-3 py-2 rounded-lg`,
+                  selectedCategories.some((c) => c.id === category.id)
+                    ? tw`bg-blue-100 dark:bg-blue-900`
+                    : tw`bg-gray-100 dark:bg-gray-800`,
+                ]}
+              >
+                <View
+                  style={[
+                    tw`w-3 h-3 rounded-full mr-2`,
+                    { backgroundColor: category.color },
+                  ]}
+                />
+                <Text
+                  style={[
+                    tw`text-sm`,
+                    selectedCategories.some((c) => c.id === category.id)
+                      ? tw`text-blue-700 dark:text-blue-300`
+                      : tw`text-gray-700 dark:text-gray-300`,
+                  ]}
+                >
+                  {category.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
 
         <TouchableOpacity

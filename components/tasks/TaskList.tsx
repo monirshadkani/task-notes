@@ -57,51 +57,47 @@ export const TaskList = () => {
 
   return (
     <View style={tw`flex-1`}>
+      <View style={tw`p-4`}>
+        <Text style={tw`text-xl font-bold text-black dark:text-white`}>
+          Tasks
+        </Text>
+      </View>
       <ScrollView
         style={tw`flex-1`}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {displayTasks.map((item) => (
-          <View key={`task-${item.id}`} style={tw`mb-4 p-4`}>
-            <TouchableOpacity onPress={() => router.push(`/tasks/${item.id}`)}>
-              <Text style={tw`text-black dark:text-white font-bold`}>
-                {item.id}
-              </Text>
-              <Text style={tw`text-black dark:text-white `}>
-                {item.description}
-              </Text>
-              <Text style={tw`text-black dark:text-white `}>
-                {item.created_at}
-              </Text>
-              <Text style={tw`text-black dark:text-white `}>
-                {item.is_completed}
-              </Text>
-              <Text style={tw`text-black dark:text-white `}>
-                {item.updated_at}
-              </Text>
-              {item.subtasks.map((subtask, index) => (
-                <View
-                  key={`task-${item.id}-subtask-${subtask.id || index}`}
-                  style={tw`ml-4 mt-2`}
-                >
-                  <Text style={tw`text-black dark:text-white `}>
-                    {subtask.id}
-                  </Text>
-                  <Text style={tw`text-black dark:text-white `}>
-                    {subtask.description}
-                  </Text>
-                  <Text style={tw`text-black dark:text-white `}>
-                    {subtask.is_completed}
-                  </Text>
-                </View>
-              ))}
-            </TouchableOpacity>
-          </View>
-        ))}
+        <View style={tw`flex-row flex-wrap justify-between px-4`}>
+          {displayTasks.map((item) => (
+            <View
+              key={`task-${item.id}`}
+              style={tw`w-[48%] mb-4 p-4 bg-blue-900 border border-blue-800 rounded-lg`}
+            >
+              <TouchableOpacity
+                onPress={() => router.push(`/tasks/${item.id}`)}
+              >
+                <Text style={tw`text-white font-bold`}>{item.id}</Text>
+                <Text style={tw`text-white`}>{item.description}</Text>
+                <Text style={tw`text-white`}>{item.created_at}</Text>
+                <Text style={tw`text-white`}>
+                  {item.is_completed ? "✅" : "❌"}
+                </Text>
+                <Text style={tw`text-white`}>{item.updated_at}</Text>
+                {item.subtasks.map((subtask, index) => (
+                  <View
+                    key={`task-${item.id}-subtask-${subtask.id || index}`}
+                    style={tw`ml-2 mt-1`}
+                  >
+                    <Text style={tw`text-white`}>{subtask.description}</Text>
+                  </View>
+                ))}
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
       </ScrollView>
-      <View style={tw`absolute bottom-6 right-6`}>
+      <View style={tw`absolute bottom-15 right-6`}>
         <TouchableOpacity
           onPress={navigateToCreate}
           style={tw`bg-blue-500 p-4 rounded-full shadow-lg`}

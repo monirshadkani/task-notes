@@ -8,11 +8,15 @@ import { Note } from "@/types/note.types";
 import { noteService } from "@/services/notes/noteService";
 import { router } from "expo-router";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { CategoryList } from "../categories/CategoryList";
 
 export const NoteList = () => {
   const [refreshing, setRefreshing] = useState(false);
-  const { notes, getNotes, setNotes } = useNotes();
+
   const [displayNotes, setDisplayNotes] = useState<Note[]>([]);
+
+  const { notes, getNotes, setNotes } = useNotes();
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -59,17 +63,17 @@ export const NoteList = () => {
           Notes
         </Text>
       </View>
-
+      <CategoryList />
       <View style={tw`flex-1`}>
         <FlashList
           data={displayNotes}
           numColumns={2}
           renderItem={({ item }: { item: Note }) => (
             <TouchableOpacity
-              style={tw`p-3 mb-2 mx-2 w-40 h-40 bg-white text-black border-2 rounded-lg truncate border-gray-100 dark:bg-blue-900 text-white border-blue-800`}
+              style={tw`bg-white dark:bg-blue-900 w-50 m-2 h-40 border-2 p-2 rounded-lg truncate border-gray-100 dark:border-blue-800`}
               onPress={() => router.push(`/notes/${item.id}`)}
             >
-              <Text style={tw`text-lg font-bold text-black dark:text-white`}>
+              <Text style={tw`text-black dark:text-white font-bold`}>
                 {item.title}
               </Text>
 
@@ -79,6 +83,30 @@ export const NoteList = () => {
               >
                 {item.content}
               </Text>
+
+              {item.categories && item.categories.length > 0 && (
+                <View style={tw`flex-row flex-wrap mt-2`}>
+                  {item.categories.map((category) => (
+                    <View
+                      key={category.id}
+                      style={tw`flex-row items-center mr-2 mb-1`}
+                    >
+                      <View
+                        style={[
+                          tw`w-2 h-2 rounded-full mr-1`,
+                          { backgroundColor: category.color },
+                        ]}
+                      />
+                      <Text
+                        style={tw`text-xs text-gray-500 dark:text-gray-400`}
+                      >
+                        {category.name}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
               <Text style={tw`text-xs text-gray-500 dark:text-gray-400 mt-2`}>
                 {new Date(item.created_at).toLocaleDateString()}
               </Text>
@@ -92,7 +120,7 @@ export const NoteList = () => {
         />
       </View>
 
-      <View style={tw`absolute bottom-5 right-5`}>
+      <View style={tw`absolute bottom-15 right-6`}>
         <TouchableOpacity
           onPress={navigateToCreate}
           style={tw`bg-blue-500 p-4 rounded-full shadow-lg`}

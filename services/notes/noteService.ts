@@ -8,10 +8,18 @@ export const noteService = {
     return apiClient.get<Note[]>(ENDPOINTS.notes.list);
   },
   async setNotesApi(note: Note): Promise<void> {
-    apiClient.post<ApiResponse<Note>>(ENDPOINTS.notes.create, {
+    const payload = {
       title: note.title,
       content: note.content,
-    });
+      categories: Array.isArray(note.categories)
+        ? note.categories.map((category) =>
+            typeof category === "number" ? category : category.id
+          )
+        : [],
+    };
+
+    console.log("Sending payload:", payload);
+    await apiClient.post<ApiResponse<Note>>(ENDPOINTS.notes.create, payload);
   },
   async deleteNoteApi(noteId: string): Promise<void> {
     apiClient.delete(ENDPOINTS.notes.delete(noteId));

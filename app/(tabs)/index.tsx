@@ -6,10 +6,8 @@ import { NoteList } from "@/components/notes/NoteList";
 import tw from "twrnc";
 export default function Index() {
   return (
-    <SafeAreaView style={tw`bg-white dark:bg-gray-900`}>
-      <View>
-        <NoteList />
-      </View>
+    <SafeAreaView style={tw`flex-1`}>
+      <NoteList />
     </SafeAreaView>
   );
 }

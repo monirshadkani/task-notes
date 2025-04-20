@@ -7,8 +7,7 @@ import tw from "twrnc";
 
 export default function Tasks() {
   return (
-    <SafeAreaView style={tw`flex-1`}>
-      <Text style={tw`text-black dark:text-white font-bold`}>Tasks</Text>
+    <SafeAreaView style={tw`flex-1 bg-white dark:bg-gray-900`}>
       <TaskList />
     </SafeAreaView>
   );

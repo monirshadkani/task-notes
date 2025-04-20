@@ -102,6 +102,17 @@ export const storageService = {
     return [];
   },
 
+  async refreshApp(): Promise<void> {
+    try {
+      await AsyncStorage.multiRemove([
+        STORAGE_KEYS.NOTES,
+        STORAGE_KEYS.TASKS,
+        STORAGE_KEYS.CATEGORIES,
+      ]);
+    } catch (error) {
+      console.error(error);
+    }
+  },
   async clearAll(): Promise<void> {
     await AsyncStorage.clear();
   },

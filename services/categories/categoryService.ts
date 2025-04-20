@@ -8,12 +8,13 @@ export const categoryService = {
     return apiClient.get<Category[]>(ENDPOINTS.categories.list);
   },
 
-  async setCategories(category: Category): Promise<void> {
-    apiClient.post<ApiResponse<Category>>(ENDPOINTS.categories.create, {
+  async setCategories(
+    category: Omit<Category, "id" | "user_id" | "created_at" | "updated_at">
+  ): Promise<void> {
+    await apiClient.post<ApiResponse<Category>>(ENDPOINTS.categories.create, {
       name: category.name,
       color: category.color,
-      created_at: category.created_at,
-      updated_at: category.updated_at,
+      is_system: category.is_system,
     });
   },
 };
