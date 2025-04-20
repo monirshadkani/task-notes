@@ -13,38 +13,12 @@ import { CategoryList } from "../categories/CategoryList";
 
 export const NoteList = () => {
   const [refreshing, setRefreshing] = useState(false);
-
-  const [displayNotes, setDisplayNotes] = useState<Note[]>([]);
-
-  const { notes, getNotes, setNotes } = useNotes();
-
-  useEffect(() => {
-    const fetchNotes = async () => {
-      try {
-        const storedNotes = await getNotes();
-        setDisplayNotes(storedNotes);
-
-        if (storedNotes.length === 0) {
-          const apiNotes = await noteService.getNotesApi();
-          await setNotes(apiNotes);
-          setDisplayNotes(apiNotes);
-        }
-      } catch (error) {
-        console.error("Failed to fetch notes:", error);
-      }
-    };
-    fetchNotes();
-  }, []);
+  const { notes, refreshNotes } = useNotes();
 
   const onRefresh = async () => {
     try {
       setRefreshing(true);
-      const apiNotes = await noteService.getNotesApi();
-
-      await setNotes(apiNotes);
-      setDisplayNotes(apiNotes);
-
-      console.log("Notes refreshed successfully:", apiNotes.length);
+      await refreshNotes();
     } catch (error) {
       console.error("Failed to refresh notes:", error);
     } finally {
@@ -66,7 +40,7 @@ export const NoteList = () => {
       <CategoryList />
       <View style={tw`flex-1`}>
         <FlashList
-          data={displayNotes}
+          data={notes}
           numColumns={2}
           renderItem={({ item }: { item: Note }) => (
             <TouchableOpacity

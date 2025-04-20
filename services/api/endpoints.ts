@@ -10,8 +10,8 @@ export const ENDPOINTS = {
   categories: {
     list: "/categories",
     create: "/categories",
-    update: (id: string) => `/categories/${id}`,
     delete: (id: string) => `/categories/${id}`,
+    update: (id: string) => `/categories/${id}`,
   },
 
   notes: {

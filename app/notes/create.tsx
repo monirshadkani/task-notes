@@ -14,6 +14,7 @@ import { noteService } from "@/services/notes/noteService";
 import { router } from "expo-router";
 import { useCategories } from "@/contexts/CategoriesContect";
 import { Category } from "@/types/category.types";
+import { useNotes } from "@/contexts/NotesContext";
 
 type CreateNotePayload = {
   title: string;
@@ -25,22 +26,8 @@ export default function CreateNote() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
-  const { getCategories } = useCategories();
-  const [availableCategories, setAvailableCategories] = useState<Category[]>(
-    []
-  );
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const categories = await getCategories();
-        setAvailableCategories(categories);
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-      }
-    };
-    fetchCategories();
-  }, []);
+  const { categories } = useCategories();
+  const { refreshNotes } = useNotes();
 
   const handleTitleChange = (text: string) => {
     setTitle(text);
@@ -70,6 +57,7 @@ export default function CreateNote() {
       };
 
       await noteService.setNotesApi(newNote as unknown as Note);
+      await refreshNotes();
       setTitle("");
       setContent("");
       setSelectedCategories([]);
@@ -129,7 +117,7 @@ export default function CreateNote() {
             Categories
           </Text>
           <View style={tw`flex-row flex-wrap`}>
-            {availableCategories.map((category) => (
+            {categories.map((category) => (
               <TouchableOpacity
                 key={category.id}
                 onPress={() => toggleCategory(category)}

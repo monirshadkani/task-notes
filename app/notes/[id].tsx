@@ -11,33 +11,47 @@ import { router } from "expo-router";
 
 export default function NoteEdit() {
   const noteId = useLocalSearchParams().id;
-  const { getNotes } = useNotes();
+  const { getNotes, deleteNote } = useNotes();
   const [note, setNote] = useState<Note | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    getNotes()
-      .then((notes) => {
-        const foundNote = notes.find(
-          (note: Note) => note.id === Number(noteId)
-        );
-        setNote(foundNote as Note);
-      })
-      .catch((error) => {
+    let isMounted = true;
+
+    const fetchNote = async () => {
+      try {
+        const notes = await getNotes();
+        if (isMounted) {
+          const foundNote = notes.find(
+            (note: Note) => note.id === Number(noteId)
+          );
+          setNote(foundNote as Note);
+        }
+      } catch (error) {
         console.error("Error fetching notes:", error);
-      });
-  }, [getNotes, noteId]);
+      }
+    };
+
+    fetchNote();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [noteId]);
 
   const handleDeleteNote = async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
     try {
+      console.log("Deleting note with ID:", noteId);
       if (note) {
-        await noteService.deleteNoteApi(noteId as string);
-
-        //const apiNotes = await noteService.getNotesApi();
-
-        router.back();
+        await deleteNote(noteId as string);
+        router.replace("/");
       }
     } catch (error) {
       console.error("Error deleting note:", error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 

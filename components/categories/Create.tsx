@@ -17,7 +17,7 @@ export const CreateCategory = () => {
   const [name, setName] = useState("");
   const [color, setColor] = useState("#000000");
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const { setCategories, getCategories } = useCategories();
+  const { refreshCategories } = useCategories();
 
   const handleSubmit = async () => {
     try {
@@ -28,13 +28,7 @@ export const CreateCategory = () => {
       };
 
       await categoryService.setCategories(newCategory);
-
-      const updatedCategories = await getCategories();
-      await setCategories(updatedCategories);
-
-      setName("");
-      setColor("#000000");
-
+      await refreshCategories();
       router.replace("/");
     } catch (error) {
       console.error("Failed to create category:", error);

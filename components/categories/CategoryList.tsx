@@ -10,31 +10,11 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const CategoryList = () => {
-  const [refreshing, setRefreshing] = useState(false);
-  const [displayCategories, setDisplayCategories] = useState<Category[]>([]);
-  const { categories, getCategories, setCategories } = useCategories();
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const storedCategories = await getCategories();
-        setDisplayCategories(storedCategories);
-
-        if (storedCategories.length === 0) {
-          const apiCategories = await categoryService.getCategoriesApi();
-          await setCategories(apiCategories);
-          setDisplayCategories(apiCategories);
-        }
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-      }
-    };
-    fetchCategories();
-  }, []);
+  const { categories } = useCategories();
 
   return (
     <View style={tw`flex-row px-4 py-2 bg-white dark:bg-gray-900`}>
-      {displayCategories.map((category) => (
+      {categories.map((category) => (
         <TouchableOpacity
           key={category.id}
           onPress={() => router.push(`/`)}

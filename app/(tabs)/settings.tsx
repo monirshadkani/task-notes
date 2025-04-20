@@ -6,8 +6,11 @@ import tw from "twrnc";
 import { storageService } from "@/services/storage/asyncStorage";
 import { router } from "expo-router";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { ManageCategories } from "@/components/categories/ManageCategories";
+import { useState } from "react";
 
 export default function Settings() {
+  const [showManageCategories, setShowManageCategories] = useState(false);
   const refreshApp = async () => {
     await storageService.refreshApp();
     router.replace("/");
@@ -43,12 +46,12 @@ export default function Settings() {
             Categories
           </Text>
           <TouchableOpacity
-            onPress={() => router.push("/categories/create")}
-            style={tw`flex-row items-center bg-blue-500 p-4 rounded-lg mb-4`}
+            onPress={() => setShowManageCategories(true)}
+            style={tw`flex-row items-center bg-blue-500 p-4 rounded-lg`}
           >
-            <IconSymbol name="plus" size={24} color="white" />
+            <IconSymbol name="pencil" size={24} color="white" />
             <Text style={tw`text-white text-lg font-bold ml-2`}>
-              Create Category
+              Manage Categories
             </Text>
           </TouchableOpacity>
         </View>
@@ -67,16 +70,20 @@ export default function Settings() {
               Refresh App
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={signOut}
-            style={tw`bg-red-500 p-4 rounded-lg`}
-          >
-            <Text style={tw`text-white text-lg font-bold text-center`}>
-              Sign Out
-            </Text>
-          </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          onPress={signOut}
+          style={tw`bg-red-500 p-4 rounded-lg items-center`}
+        >
+          <Text style={tw`text-white font-bold`}>Sign Out</Text>
+        </TouchableOpacity>
       </View>
+
+      <ManageCategories
+        visible={showManageCategories}
+        onClose={() => setShowManageCategories(false)}
+      />
     </SafeAreaView>
   );
 }

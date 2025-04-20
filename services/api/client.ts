@@ -19,17 +19,17 @@ export const apiClient = {
         headers,
       });
 
-      const responseData = await response.json();
+      const data = await response.json();
 
       if (!response.ok) {
-        throw { message: responseData.message || "Something went wrong" };
+        throw { message: data.message || "Something went wrong" };
       }
 
       if (endpoint === "/login") {
-        return responseData;
+        return data;
       }
 
-      return responseData.data;
+      return data.data;
     } catch (error) {
       throw { message: "Failed to connect to the server" };
     }
@@ -50,8 +50,9 @@ export const apiClient = {
       body: JSON.stringify(body),
     }),
 
-  delete: <T>(endpoint: string) =>
-    apiClient.request<T>(endpoint, {
+  delete: <T>(endpoint: string) => {
+    return apiClient.request<T>(endpoint, {
       method: "DELETE",
-    }),
+    });
+  },
 };
