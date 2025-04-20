@@ -29,7 +29,6 @@ export const noteService = {
         : [],
     };
 
-    console.log("Sending payload:", payload);
     await apiClient.post<ApiResponse<Note>>(ENDPOINTS.notes.create, payload);
   },
 
@@ -48,7 +47,6 @@ export const noteService = {
   },
 
   async deleteNoteApi(noteId: string): Promise<void> {
-    console.log("Deleting service:", noteId);
     await apiClient.delete(ENDPOINTS.notes.delete(noteId));
   },
 };

@@ -1,5 +1,6 @@
-export const API_URL = "http://192.168.1.16:8000/api";
-//export const API_URL = "https://keep.kevindupas.com/api";
+import { API_URL as ENV_API_URL } from "react-native-dotenv";
+
+const BASE_URL = ENV_API_URL;
 
 export const ENDPOINTS = {
   auth: {
@@ -39,6 +40,8 @@ export const ENDPOINTS = {
     },
   },
 } as const;
+
+export { BASE_URL as API_URL };
 
 // apiClient.get(ENDPOINTS.notes.list)
 // apiClient.post(ENDPOINTS.auth.login, { email, password })

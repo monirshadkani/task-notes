@@ -5,6 +5,7 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
+  TextInput,
 } from "react-native";
 import tw from "twrnc";
 import { useState, useEffect } from "react";
@@ -22,6 +23,8 @@ import { Ionicons } from "@expo/vector-icons";
 
 export const TaskList = () => {
   const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showCompleted, setShowCompleted] = useState<boolean | null>(null);
   const { tasks, refreshTasks, toggleTask } = useTasks();
   const { notes } = useNotes();
   const { isDarkMode } = useTheme();
@@ -55,16 +58,94 @@ export const TaskList = () => {
     return note?.categories?.[0]?.color || "#9CA3AF";
   };
 
+  const filteredTasks = tasks.filter((task) => {
+    const matchesSearch = searchQuery
+      ? task.description.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+
+    const matchesCompletion =
+      showCompleted === null ? true : task.is_completed === showCompleted;
+
+    return matchesSearch && matchesCompletion;
+  });
+
   return (
     <View style={tw`flex-1 bg-white dark:bg-gray-900`}>
       <View style={tw`p-4`}>
-        <Text style={tw`text-xl font-bold text-black dark:text-white`}>
-          Tasks
-        </Text>
+        <TextInput
+          style={tw`mt-2 p-2 border rounded-lg text-black dark:text-white border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800`}
+          placeholder="Search tasks..."
+          placeholderTextColor={isDarkMode ? "#666" : "#999"}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        <View style={tw`flex-row mt-2`}>
+          <TouchableOpacity
+            onPress={() => setShowCompleted(null)}
+            style={[
+              tw`px-3 py-2 rounded-lg mr-2`,
+              showCompleted === null
+                ? tw`bg-blue-500`
+                : tw`bg-gray-200 dark:bg-gray-700`,
+            ]}
+          >
+            <Text
+              style={[
+                tw`text-sm`,
+                showCompleted === null
+                  ? tw`text-white`
+                  : tw`text-gray-700 dark:text-gray-300`,
+              ]}
+            >
+              All
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setShowCompleted(false)}
+            style={[
+              tw`px-3 py-2 rounded-lg mr-2`,
+              showCompleted === false
+                ? tw`bg-blue-500`
+                : tw`bg-gray-200 dark:bg-gray-700`,
+            ]}
+          >
+            <Text
+              style={[
+                tw`text-sm`,
+                showCompleted === false
+                  ? tw`text-white`
+                  : tw`text-gray-700 dark:text-gray-300`,
+              ]}
+            >
+              Active
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setShowCompleted(true)}
+            style={[
+              tw`px-3 py-2 rounded-lg`,
+              showCompleted === true
+                ? tw`bg-blue-500`
+                : tw`bg-gray-200 dark:bg-gray-700`,
+            ]}
+          >
+            <Text
+              style={[
+                tw`text-sm`,
+                showCompleted === true
+                  ? tw`text-white`
+                  : tw`text-gray-700 dark:text-gray-300`,
+              ]}
+            >
+              Completed
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={tw`flex-1`}>
+
+      <View style={tw`flex-1 min-h-[200px]`}>
         <FlashList
-          data={tasks}
+          data={filteredTasks}
           renderItem={({ item }: { item: Task }) => (
             <TouchableOpacity
               style={[
@@ -214,7 +295,7 @@ export const TaskList = () => {
         />
       </View>
 
-      <View style={tw`absolute bottom-15 right-6`}>
+      <View style={tw`absolute bottom-3 right-6`}>
         <TouchableOpacity
           onPress={navigateToCreate}
           style={tw`bg-blue-500 p-4 rounded-full`}

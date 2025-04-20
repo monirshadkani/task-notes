@@ -1,5 +1,5 @@
 import { API_URL } from "@/services/api/endpoints";
-import { storageService } from "../storage/asyncStorage";
+import { secureStorage } from "@/services/storage/secureStorage";
 
 interface ApiError {
   message: string;
@@ -9,7 +9,7 @@ interface ApiError {
 export const apiClient = {
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${API_URL}${endpoint}`;
-    const token = await storageService.getUserToken();
+    const token = await secureStorage.getAuthToken();
 
     const headers = {
       "Content-Type": "application/json",

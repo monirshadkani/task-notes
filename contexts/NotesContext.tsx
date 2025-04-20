@@ -59,7 +59,6 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
   const refreshNotes = async () => {
     try {
       const apiNotes = await noteService.getNotesApi();
-      console.log("apiNotes", apiNotes);
       if (apiNotes && apiNotes.length > 0) {
         await storageService.setNotesStorage(apiNotes);
         setNotesState(apiNotes);

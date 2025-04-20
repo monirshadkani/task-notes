@@ -20,6 +20,8 @@ import { CategoryList } from "../categories/CategoryList";
 import { useCategories } from "@/contexts/CategoriesContect";
 import { useTheme } from "@/contexts/ThemeContext";
 
+const DEFAULT_CATEGORY_COLOR = "#9CA3AF";
+
 const getContrastColor = (hexColor: string): string => {
   const color = hexColor.replace("#", "");
   const r = parseInt(color.substring(0, 2), 16);
@@ -74,9 +76,6 @@ export const NoteList = () => {
   return (
     <View style={tw`flex-1 bg-white dark:bg-gray-900`}>
       <View style={tw`p-4`}>
-        <Text style={tw`text-xl font-bold text-black dark:text-white`}>
-          Notes
-        </Text>
         <TextInput
           style={tw`mt-2 p-2 border rounded-lg text-black dark:text-white border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800`}
           placeholder="Search notes..."
@@ -112,7 +111,7 @@ export const NoteList = () => {
               <View
                 style={[
                   tw`w-3 h-3 rounded-full`,
-                  { backgroundColor: category.color },
+                  { backgroundColor: category.color || DEFAULT_CATEGORY_COLOR },
                 ]}
               />
             </TouchableOpacity>
@@ -120,14 +119,14 @@ export const NoteList = () => {
         </ScrollView>
       </View>
 
-      <View style={tw`flex-1`}>
+      <View style={tw`flex-1 min-h-[200px]`}>
         <FlashList
           data={filteredNotes}
           numColumns={2}
           renderItem={({ item }: { item: Note }) => {
             const firstCategory = item.categories[0];
             const backgroundColor =
-              firstCategory?.color || (isDarkMode ? "#1f2937" : "#ffffff");
+              firstCategory?.color || DEFAULT_CATEGORY_COLOR;
             const textColor = getContrastColor(backgroundColor);
 
             return (
@@ -166,7 +165,8 @@ export const NoteList = () => {
                           style={[
                             tw`w-2 h-2 rounded-full mr-1 border`,
                             {
-                              backgroundColor: category.color,
+                              backgroundColor:
+                                category.color || DEFAULT_CATEGORY_COLOR,
                               borderColor: textColor,
                               borderWidth: 1,
                             },
@@ -194,7 +194,7 @@ export const NoteList = () => {
         />
       </View>
 
-      <View style={tw`absolute bottom-15 right-6`}>
+      <View style={tw`absolute bottom-3 right-6`}>
         <TouchableOpacity
           onPress={navigateToCreate}
           style={tw`bg-blue-500 p-4 rounded-full`}

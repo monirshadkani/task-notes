@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Text,
   ScrollView,
+  SafeAreaView,
 } from "react-native";
 import tw from "twrnc";
 import { Note } from "@/types/note.types";
@@ -15,6 +16,7 @@ import { router } from "expo-router";
 import { useCategories } from "@/contexts/CategoriesContect";
 import { Category } from "@/types/category.types";
 import { useNotes } from "@/contexts/NotesContext";
+import { useDebounce } from "@/hooks/useDebounce";
 
 type CreateNotePayload = {
   title: string;
@@ -48,7 +50,7 @@ export default function CreateNote() {
     });
   };
 
-  const handleSubmit = async () => {
+  const debouncedSubmit = useDebounce(async () => {
     try {
       const newNote: CreateNotePayload = {
         title: title,
@@ -65,19 +67,33 @@ export default function CreateNote() {
     } catch (error) {
       console.error("Failed to create note:", error);
     }
+  }, 500);
+
+  const handleSubmit = () => {
+    debouncedSubmit();
   };
 
   return (
-    <View style={tw`flex-1 bg-white dark:bg-gray-900`}>
+    <SafeAreaView style={tw`flex-1 bg-white dark:bg-gray-900`}>
       <View
-        style={tw`flex-row items-center p-4 border-b border-gray-200 dark:border-gray-700`}
+        style={tw`flex-row justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700`}
       >
-        <TouchableOpacity style={tw`mr-4`}></TouchableOpacity>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={tw`text-blue-500 text-base`}>Cancel</Text>
+        </TouchableOpacity>
         <Text style={tw`text-xl font-bold text-black dark:text-white`}>
-          Create a Note
+          Create Note
         </Text>
+        <TouchableOpacity onPress={handleSubmit}>
+          <Text style={tw`text-blue-500 text-base`}>Save</Text>
+        </TouchableOpacity>
       </View>
-      <ScrollView style={tw`flex-1 p-4`}>
+
+      <ScrollView
+        style={tw`flex-1`}
+        contentContainerStyle={tw`p-4`}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={tw`mb-4`}>
           <Text
             style={tw`text-sm font-medium mb-2 text-gray-700 dark:text-gray-300`}
@@ -116,13 +132,13 @@ export default function CreateNote() {
           >
             Categories
           </Text>
-          <View style={tw`flex-row flex-wrap`}>
+          <View style={tw`flex-row flex-wrap gap-2`}>
             {categories.map((category) => (
               <TouchableOpacity
                 key={category.id}
                 onPress={() => toggleCategory(category)}
                 style={[
-                  tw`flex-row items-center mr-2 mb-2 px-3 py-2 rounded-lg`,
+                  tw`flex-row items-center px-3 py-2 rounded-lg`,
                   selectedCategories.some((c) => c.id === category.id)
                     ? tw`bg-blue-100 dark:bg-blue-900`
                     : tw`bg-gray-100 dark:bg-gray-800`,
@@ -148,14 +164,7 @@ export default function CreateNote() {
             ))}
           </View>
         </View>
-
-        <TouchableOpacity
-          style={tw`bg-blue-500 p-4 rounded-lg items-center`}
-          onPress={handleSubmit}
-        >
-          <Text style={tw`text-white font-bold`}>Create Note</Text>
-        </TouchableOpacity>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

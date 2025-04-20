@@ -4,6 +4,12 @@ import { User } from "../auth/auth.types";
 import { Note } from "@/types/note.types";
 import { Task } from "@/types/task.types";
 import { Category } from "@/types";
+import {
+  validateNote,
+  validateTask,
+  validateCategory,
+  validateDataArray,
+} from "@/utils/validation";
 
 const STORAGE_KEYS = {
   USER_TOKEN: "userToken",
@@ -69,6 +75,9 @@ export const storageService = {
 
   async setNotesStorage(notes: Note[]): Promise<void> {
     try {
+      if (!validateDataArray(notes, validateNote)) {
+        throw new Error("Invalid notes data structure");
+      }
       await AsyncStorage.setItem(STORAGE_KEYS.NOTES, JSON.stringify(notes));
     } catch (error) {
       console.error("Error setting notes:", error);
@@ -81,7 +90,11 @@ export const storageService = {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.NOTES);
       if (!data) return [];
       const parsed = JSON.parse(data);
-      return Array.isArray(parsed) ? parsed : [];
+      if (!validateDataArray(parsed, validateNote)) {
+        console.warn("Invalid notes data structure found in storage");
+        return [];
+      }
+      return parsed;
     } catch (error) {
       console.error("Error parsing notes:", error);
       return [];
@@ -90,6 +103,9 @@ export const storageService = {
 
   async setTasksStorage(tasks: Task[]): Promise<void> {
     try {
+      if (!validateDataArray(tasks, validateTask)) {
+        throw new Error("Invalid tasks data structure");
+      }
       await AsyncStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
     } catch (error) {
       console.error("Error setting tasks:", error);
@@ -102,7 +118,11 @@ export const storageService = {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.TASKS);
       if (!data) return [];
       const parsed = JSON.parse(data);
-      return Array.isArray(parsed) ? parsed : [];
+      if (!validateDataArray(parsed, validateTask)) {
+        console.warn("Invalid tasks data structure found in storage");
+        return [];
+      }
+      return parsed;
     } catch (error) {
       console.error("Error parsing tasks:", error);
       return [];
@@ -111,6 +131,9 @@ export const storageService = {
 
   async setCategoriesStorage(categories: Category[]): Promise<void> {
     try {
+      if (!validateDataArray(categories, validateCategory)) {
+        throw new Error("Invalid categories data structure");
+      }
       await AsyncStorage.setItem(
         STORAGE_KEYS.CATEGORIES,
         JSON.stringify(categories)
@@ -126,7 +149,11 @@ export const storageService = {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.CATEGORIES);
       if (!data) return [];
       const parsed = JSON.parse(data);
-      return Array.isArray(parsed) ? parsed : [];
+      if (!validateDataArray(parsed, validateCategory)) {
+        console.warn("Invalid categories data structure found in storage");
+        return [];
+      }
+      return parsed;
     } catch (error) {
       console.error("Error parsing categories:", error);
       return [];
@@ -135,11 +162,15 @@ export const storageService = {
 
   async refreshApp(): Promise<void> {
     try {
-      await AsyncStorage.multiRemove([
+      // Clear only the data that needs to be refreshed
+      const keysToRemove = [
         STORAGE_KEYS.NOTES,
         STORAGE_KEYS.CATEGORIES,
         STORAGE_KEYS.TASKS,
-      ]);
+      ];
+
+      // Use multiRemove for better performance
+      await AsyncStorage.multiRemove(keysToRemove);
     } catch (error) {
       console.error("Error refreshing app:", error);
       throw error;

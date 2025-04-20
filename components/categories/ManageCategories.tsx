@@ -48,9 +48,7 @@ export const ManageCategories = ({
 
   const handleDelete = async (category: Category) => {
     try {
-      console.log("Deleting category:", category.id);
       await categoryService.deleteCategory(category.id.toString());
-      console.log("Category deleted successfully");
       await refreshCategories();
     } catch (error: any) {
       console.error("Failed to delete category:", error);

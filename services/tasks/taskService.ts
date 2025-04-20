@@ -6,7 +6,32 @@ export const taskService = {
   async getTasksApi(): Promise<Task[]> {
     try {
       const response = await apiClient.get<Task[]>(ENDPOINTS.tasks.list);
-      return Array.isArray(response) ? response : [];
+
+      if (!Array.isArray(response)) {
+        console.warn("API response is not an array:", response);
+        return [];
+      }
+
+      const formattedTasks = response.map((task) => ({
+        id: Number(task.id),
+        description: String(task.description),
+        is_completed: Boolean(task.is_completed),
+        user_id: task.user_id ? Number(task.user_id) : undefined,
+        note_id: task.note_id ? Number(task.note_id) : undefined,
+        category_id: task.category_id ? Number(task.category_id) : undefined,
+        subtasks: task.subtasks
+          ? task.subtasks.map((subtask) => ({
+              id: subtask.id ? Number(subtask.id) : undefined,
+              description: String(subtask.description),
+              is_completed: Boolean(subtask.is_completed),
+            }))
+          : undefined,
+        created_at: task.created_at,
+        updated_at: task.updated_at,
+        note: task.note,
+      }));
+
+      return formattedTasks;
     } catch (error) {
       console.error("Failed to fetch tasks:", error);
       return [];

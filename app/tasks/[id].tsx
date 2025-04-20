@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Switch,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import tw from "twrnc";
@@ -17,14 +18,15 @@ import { useState, useEffect } from "react";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useTheme } from "@/contexts/ThemeContext";
 
+const DEFAULT_CATEGORY_COLOR = "#9CA3AF";
+
 export default function TaskEdit() {
   const taskId = useLocalSearchParams().id;
-  const { getTasks, deleteTask, updateTask, toggleTask } = useTasks();
+  const { getTasks, deleteTask, updateTask } = useTasks();
   const { notes } = useNotes();
   const { isDarkMode } = useTheme();
   const router = useRouter();
   const [task, setTask] = useState<Task | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [editedTask, setEditedTask] = useState<Partial<Task>>({});
   const [newSubtask, setNewSubtask] = useState("");
   const [showNoteSelector, setShowNoteSelector] = useState(false);
@@ -60,19 +62,8 @@ export default function TaskEdit() {
     }
   };
 
-  const handleToggleTask = async () => {
-    try {
-      await toggleTask(taskId as string);
-      const tasks = await getTasks();
-      const updatedTask = tasks.find(
-        (task: Task) => task.id === Number(taskId)
-      );
-      if (updatedTask) {
-        setTask(updatedTask);
-      }
-    } catch (error) {
-      console.error("Error toggling task:", error);
-    }
+  const handleCancel = () => {
+    router.back();
   };
 
   const handleUpdate = async () => {
@@ -80,6 +71,7 @@ export default function TaskEdit() {
       const taskData = {
         description: editedTask.description,
         note_id: editedTask.note_id,
+        is_completed: editedTask.is_completed,
         subtasks: editedTask.subtasks?.map((subtask) => ({
           description: subtask.description,
           is_completed: subtask.is_completed,
@@ -87,20 +79,7 @@ export default function TaskEdit() {
       };
 
       await updateTask(taskId as string, taskData);
-      setIsEditing(false);
-
-      // Refresh the task data
-      const tasks = await getTasks();
-      const updatedTask = tasks.find(
-        (task: Task) => task.id === Number(taskId)
-      );
-      if (updatedTask) {
-        setTask(updatedTask);
-        setEditedTask({
-          ...updatedTask,
-          subtasks: [...(updatedTask.subtasks || [])],
-        });
-      }
+      router.back();
     } catch (error) {
       console.error("Error updating task:", error);
     }
@@ -157,272 +136,238 @@ export default function TaskEdit() {
   }
 
   return (
-    <SafeAreaView style={tw`flex-1 p-4 bg-white dark:bg-gray-900`}>
-      <View style={tw`flex-row justify-between items-center mb-4`}>
-        <View style={tw`flex-row items-center`}>
-          <TouchableOpacity onPress={() => router.back()} style={tw`mr-4`}>
-            <IconSymbol
-              name="chevron.left"
-              size={24}
-              color={isDarkMode ? "white" : "black"}
-            />
+    <SafeAreaView style={tw`flex-1 bg-white dark:bg-gray-900`}>
+      <View
+        style={tw`flex-row justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700`}
+      >
+        <TouchableOpacity onPress={handleCancel}>
+          <Text style={tw`text-blue-500 text-base`}>Cancel</Text>
+        </TouchableOpacity>
+        <Text style={tw`text-xl font-bold text-black dark:text-white`}>
+          Task Details
+        </Text>
+        <View style={tw`flex-row gap-4`}>
+          <TouchableOpacity onPress={handleDelete}>
+            <IconSymbol name="trash" size={24} color="red" />
           </TouchableOpacity>
-          <Text style={tw`text-xl font-bold text-black dark:text-white`}>
-            Task Details
-          </Text>
-        </View>
-        <View style={tw`flex-row`}>
-          <TouchableOpacity onPress={handleToggleTask} style={tw`mr-4`}>
-            <IconSymbol
-              name={task.is_completed ? "checkmark" : "xmark"}
-              size={24}
-              color={task.is_completed ? "#10B981" : "#9CA3AF"}
-            />
+          <TouchableOpacity onPress={handleUpdate}>
+            <Text style={tw`text-blue-500 text-base`}>Save</Text>
           </TouchableOpacity>
-          {isEditing ? (
-            <>
-              <TouchableOpacity
-                onPress={handleUpdate}
-                style={tw`bg-green-500 p-2 rounded-lg mr-2`}
-              >
-                <Text style={tw`text-white`}>Save</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  setIsEditing(false);
-                  setEditedTask(task);
-                }}
-                style={tw`bg-gray-500 p-2 rounded-lg`}
-              >
-                <Text style={tw`text-white`}>Cancel</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              <TouchableOpacity
-                onPress={() => setIsEditing(true)}
-                style={tw`bg-blue-500 p-2 rounded-lg mr-2`}
-              >
-                <Text style={tw`text-white`}>Edit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleDelete}
-                style={tw`bg-red-500 p-2 rounded-lg`}
-              >
-                <Text style={tw`text-white`}>Delete</Text>
-              </TouchableOpacity>
-            </>
-          )}
         </View>
       </View>
 
-      {task.note && !isEditing && (
-        <View style={tw`mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg`}>
-          <View style={tw`flex-row items-center mb-2`}>
-            <View
-              style={[
-                tw`w-3 h-3 rounded-full mr-2`,
-                {
-                  backgroundColor:
-                    task.note.categories?.[0]?.color || "#9CA3AF",
-                },
-              ]}
-            />
-            <Text style={tw`text-lg font-medium text-black dark:text-white`}>
-              Associated Note
+      <ScrollView
+        style={tw`flex-1`}
+        contentContainerStyle={tw`p-4`}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={tw`mb-4`}>
+          <Text
+            style={tw`text-sm font-medium mb-2 text-gray-700 dark:text-gray-300`}
+          >
+            Status
+          </Text>
+          <View
+            style={tw`flex-row items-center justify-between p-3 rounded-lg border border-gray-300 dark:border-gray-700`}
+          >
+            <Text style={tw`text-gray-700 dark:text-gray-300`}>
+              {editedTask.is_completed ? "Completed" : "In Progress"}
             </Text>
-          </View>
-          <Text style={tw`text-gray-700 dark:text-gray-300`}>
-            {task.note.title}
-          </Text>
-          <Text style={tw`text-sm text-gray-500 dark:text-gray-400 mt-1`}>
-            {task.note.content}
-          </Text>
-        </View>
-      )}
-
-      {isEditing ? (
-        <ScrollView>
-          <View>
-            <TextInput
-              style={tw`border p-2 rounded-lg mb-2 text-black dark:text-white`}
-              value={editedTask.description}
-              onChangeText={(text) =>
-                setEditedTask((prev) => ({ ...prev, description: text }))
+            <Switch
+              value={editedTask.is_completed}
+              onValueChange={(value) =>
+                setEditedTask((prev) => ({ ...prev, is_completed: value }))
               }
-              placeholder="Task description"
+              trackColor={{ false: "#9CA3AF", true: "#10B981" }}
+              thumbColor={editedTask.is_completed ? "#10B981" : "#F3F4F6"}
             />
+          </View>
+        </View>
 
-            <View style={tw`mt-4`}>
+        <View style={tw`mb-4`}>
+          <Text
+            style={tw`text-sm font-medium mb-2 text-gray-700 dark:text-gray-300`}
+          >
+            Description
+          </Text>
+          <TextInput
+            style={tw`w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white`}
+            value={editedTask.description}
+            onChangeText={(text) =>
+              setEditedTask((prev) => ({ ...prev, description: text }))
+            }
+            placeholder="Task description"
+            placeholderTextColor="#666"
+          />
+        </View>
+
+        {task.note && (
+          <View style={tw`mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg`}>
+            <View style={tw`flex-row items-center mb-2`}>
+              <View
+                style={[
+                  tw`w-3 h-3 rounded-full mr-2`,
+                  {
+                    backgroundColor:
+                      task.note.categories?.[0]?.color ||
+                      DEFAULT_CATEGORY_COLOR,
+                  },
+                ]}
+              />
               <Text
-                style={tw`text-lg font-bold text-black dark:text-white mb-2`}
+                style={tw`text-base font-medium text-gray-700 dark:text-gray-300`}
               >
                 Associated Note
               </Text>
-              <TouchableOpacity
-                onPress={() => setShowNoteSelector(!showNoteSelector)}
-                style={tw`border p-2 rounded-lg mb-2`}
-              >
-                <View style={tw`flex-row items-center`}>
-                  {editedTask.note_id && (
-                    <View
-                      style={[
-                        tw`w-3 h-3 rounded-full mr-2`,
-                        {
-                          backgroundColor:
-                            notes.find((n) => n.id === editedTask.note_id)
-                              ?.categories?.[0]?.color || "#9CA3AF",
-                        },
-                      ]}
-                    />
-                  )}
-                  <Text style={tw`text-black dark:text-white`}>
-                    {editedTask.note_id
-                      ? notes.find((n) => n.id === editedTask.note_id)?.title ||
-                        "Select a note"
-                      : "Select a note"}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-
-              {showNoteSelector && (
-                <View style={tw`max-h-40 border rounded-lg`}>
-                  <ScrollView>
-                    {notes.map((note) => (
-                      <TouchableOpacity
-                        key={note.id}
-                        onPress={() => {
-                          setEditedTask((prev) => ({
-                            ...prev,
-                            note_id: note.id,
-                          }));
-                          setShowNoteSelector(false);
-                        }}
-                        style={tw`p-2 border-b border-gray-200 dark:border-gray-700`}
-                      >
-                        <View style={tw`flex-row items-center`}>
-                          <View
-                            style={[
-                              tw`w-3 h-3 rounded-full mr-2`,
-                              {
-                                backgroundColor:
-                                  note.categories?.[0]?.color || "#9CA3AF",
-                              },
-                            ]}
-                          />
-                          <Text style={tw`text-black dark:text-white`}>
-                            {note.title}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
-              )}
             </View>
+            <Text style={tw`text-base text-gray-700 dark:text-gray-300`}>
+              {task.note.title}
+            </Text>
+            <Text style={tw`text-sm text-gray-500 dark:text-gray-400 mt-1`}>
+              {task.note.content}
+            </Text>
+          </View>
+        )}
 
-            <View style={tw`mt-4`}>
-              <Text
-                style={tw`text-lg font-bold text-black dark:text-white mb-2`}
-              >
-                Subtasks
-              </Text>
-              <View style={tw`flex-row mb-2`}>
-                <TextInput
-                  style={tw`flex-1 border p-2 rounded-lg mr-2 text-black dark:text-white`}
-                  value={newSubtask}
-                  onChangeText={setNewSubtask}
-                  placeholder="New subtask"
-                />
-                <TouchableOpacity
-                  onPress={handleAddSubtask}
-                  style={tw`bg-blue-500 p-2 rounded-lg`}
-                >
-                  <Text style={tw`text-white`}>Add</Text>
-                </TouchableOpacity>
-              </View>
-
-              {(editedTask.subtasks || []).map((subtask, index) => (
+        <View style={tw`mb-4`}>
+          <Text
+            style={tw`text-sm font-medium mb-2 text-gray-700 dark:text-gray-300`}
+          >
+            Associated Note
+          </Text>
+          <TouchableOpacity
+            onPress={() => setShowNoteSelector(!showNoteSelector)}
+            style={tw`p-3 rounded-lg border border-gray-300 dark:border-gray-700`}
+          >
+            <View style={tw`flex-row items-center`}>
+              {editedTask.note_id && (
                 <View
-                  key={index}
-                  style={tw`flex-row items-center justify-between p-2 border rounded-lg mb-2`}
-                >
+                  style={[
+                    tw`w-3 h-3 rounded-full mr-2`,
+                    {
+                      backgroundColor:
+                        notes.find((n) => n.id === editedTask.note_id)
+                          ?.categories?.[0]?.color || DEFAULT_CATEGORY_COLOR,
+                    },
+                  ]}
+                />
+              )}
+              <Text style={tw`text-gray-700 dark:text-gray-300`}>
+                {editedTask.note_id
+                  ? notes.find((n) => n.id === editedTask.note_id)?.title ||
+                    "Select a note"
+                  : "Select a note"}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {showNoteSelector && (
+            <View
+              style={tw`mt-2 max-h-40 border border-gray-300 dark:border-gray-700 rounded-lg`}
+            >
+              <ScrollView>
+                {notes.map((note) => (
+                  <TouchableOpacity
+                    key={note.id}
+                    onPress={() => {
+                      setEditedTask((prev) => ({
+                        ...prev,
+                        note_id: note.id,
+                      }));
+                      setShowNoteSelector(false);
+                    }}
+                    style={tw`p-3 border-b border-gray-200 dark:border-gray-700`}
+                  >
+                    <View style={tw`flex-row items-center`}>
+                      <View
+                        style={[
+                          tw`w-3 h-3 rounded-full mr-2`,
+                          {
+                            backgroundColor:
+                              note.categories?.[0]?.color ||
+                              DEFAULT_CATEGORY_COLOR,
+                          },
+                        ]}
+                      />
+                      <Text style={tw`text-gray-700 dark:text-gray-300`}>
+                        {note.title}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+        </View>
+
+        <View style={tw`mb-4`}>
+          <Text
+            style={tw`text-sm font-medium mb-2 text-gray-700 dark:text-gray-300`}
+          >
+            Subtasks
+          </Text>
+          <View style={tw``}>
+            {editedTask.subtasks?.map((subtask, index) => (
+              <View
+                key={index}
+                style={tw`flex-row items-center justify-between p-3 rounded-lg border border-gray-300 dark:border-gray-700`}
+              >
+                <View style={tw`flex-row items-center flex-1`}>
                   <TouchableOpacity
                     onPress={() => handleToggleSubtask(index)}
-                    style={tw`flex-row items-center flex-1`}
+                    style={tw`mr-3`}
                   >
                     <View
                       style={[
-                        tw`w-5 h-5 rounded-full border mr-2`,
+                        tw`w-5 h-5 rounded-full border-2 items-center justify-center`,
                         subtask.is_completed
-                          ? tw`bg-green-500`
-                          : tw`bg-transparent`,
-                      ]}
-                    />
-                    <Text
-                      style={[
-                        tw`text-black dark:text-white`,
-                        subtask.is_completed && tw`line-through text-gray-500`,
+                          ? tw`bg-green-500 border-green-500`
+                          : tw`border-gray-300 dark:border-gray-600`,
                       ]}
                     >
-                      {subtask.description}
-                    </Text>
+                      {subtask.is_completed && (
+                        <IconSymbol name="checkmark" size={12} color="white" />
+                      )}
+                    </View>
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => handleDeleteSubtask(index)}
-                    style={tw`p-2`}
-                  >
-                    <Text style={tw`text-red-500`}>Delete</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
-          </View>
-        </ScrollView>
-      ) : (
-        <View>
-          <Text style={tw`text-lg text-black dark:text-white`}>
-            {task.description}
-          </Text>
-
-          {task.subtasks && task.subtasks.length > 0 && (
-            <View style={tw`mt-4`}>
-              <Text
-                style={tw`text-lg font-bold text-black dark:text-white mb-2`}
-              >
-                Subtasks
-              </Text>
-              {task.subtasks.map((subtask, index) => (
-                <View
-                  key={index}
-                  style={tw`flex-row items-center p-2 border rounded-lg mb-2`}
-                >
-                  <View
-                    style={[
-                      tw`w-5 h-5 rounded-full border mr-2`,
-                      subtask.is_completed
-                        ? tw`bg-green-500`
-                        : tw`bg-transparent`,
-                    ]}
-                  />
                   <Text
                     style={[
-                      tw`text-black dark:text-white`,
-                      subtask.is_completed && tw`line-through text-gray-500`,
+                      tw`flex-1`,
+                      subtask.is_completed
+                        ? tw`text-gray-400 dark:text-gray-500 line-through`
+                        : tw`text-gray-700 dark:text-gray-300`,
                     ]}
                   >
                     {subtask.description}
                   </Text>
                 </View>
-              ))}
-            </View>
-          )}
-        </View>
-      )}
+                <TouchableOpacity
+                  onPress={() => handleDeleteSubtask(index)}
+                  style={tw`ml-2`}
+                >
+                  <IconSymbol name="trash" size={16} color="red" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
 
-      <Text style={tw`text-xs text-gray-500 dark:text-gray-400 mt-2`}>
-        Created at: {task.created_at}
-      </Text>
+          <View style={tw`flex-row mt-4`}>
+            <TextInput
+              style={tw`flex-1 p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white`}
+              value={newSubtask}
+              onChangeText={setNewSubtask}
+              placeholder="Add a subtask"
+              placeholderTextColor="#666"
+            />
+            <TouchableOpacity
+              onPress={handleAddSubtask}
+              style={tw`ml-2 p-3 bg-blue-500 rounded-lg`}
+            >
+              <IconSymbol name="plus" size={20} color="white" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

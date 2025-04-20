@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Text,
   ScrollView,
+  SafeAreaView,
 } from "react-native";
 import tw from "twrnc";
 import { Subtask, Task } from "@/types/task.types";
@@ -14,6 +15,7 @@ import { router } from "expo-router";
 import { Switch } from "react-native";
 import { useNotes } from "@/contexts/NotesContext";
 import { Note } from "@/types/note.types";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function TaskCreate() {
   const [description, setDescription] = useState("");
@@ -43,7 +45,7 @@ export default function TaskCreate() {
     setSubtasks(updatedSubtasks);
   };
 
-  const handleSubmit = async () => {
+  const debouncedSubmit = useDebounce(async () => {
     try {
       const newTask: Partial<Task> = {
         description: description,
@@ -58,126 +60,179 @@ export default function TaskCreate() {
       setSelectedNote(null);
       router.back();
     } catch (error) {
-      console.error("Error creating task", error);
+      console.error("Failed to create task:", error);
     }
+  }, 500);
+
+  const handleSubmit = () => {
+    debouncedSubmit();
   };
 
   return (
-    <View style={tw`flex-1 bg-white p-4`}>
-      <Text style={tw`text-2xl font-bold`}>Create task</Text>
-      <TextInput
-        style={tw`border border-gray-300 rounded-md p-2 my-2`}
-        placeholder="Task description"
-        value={description}
-        onChangeText={setDescription}
-      />
-      <View style={tw`flex-row items-center mb-2`}>
-        <Text style={tw`mr-2`}>Completed:</Text>
-        <Switch
-          value={is_completed}
-          onValueChange={() => setIs_completed(!is_completed)}
-        />
-      </View>
-
-      <View style={tw`mb-6`}>
-        <Text
-          style={tw`text-sm font-medium mb-2 text-gray-700 dark:text-gray-300`}
-        >
-          Select a Note (Optional)
+    <SafeAreaView style={tw`flex-1 bg-white dark:bg-gray-900`}>
+      <View
+        style={tw`flex-row justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700`}
+      >
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={tw`text-blue-500 text-base`}>Cancel</Text>
+        </TouchableOpacity>
+        <Text style={tw`text-xl font-bold text-black dark:text-white`}>
+          Create Task
         </Text>
-        <View style={tw`space-y-2`}>
-          {notes.map((note) => (
-            <TouchableOpacity
-              key={note.id}
-              onPress={() => setSelectedNote(note)}
-              style={[
-                tw`p-3 rounded-lg border`,
-                selectedNote?.id === note.id
-                  ? tw`border-blue-500 bg-blue-50 dark:bg-blue-900/20`
-                  : tw`border-gray-200 dark:border-gray-700`,
-              ]}
-            >
-              <View style={tw`flex-row items-center`}>
-                <View
-                  style={[
-                    tw`w-3 h-3 rounded-full mr-2`,
-                    { backgroundColor: note.categories[0]?.color || "#9CA3AF" },
-                  ]}
-                />
-                <Text
-                  style={[
-                    tw`text-sm`,
-                    selectedNote?.id === note.id
-                      ? tw`text-blue-700 dark:text-blue-300`
-                      : tw`text-gray-700 dark:text-gray-300`,
-                  ]}
-                >
-                  {note.title}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      <View style={tw`mb-4`}>
-        <Text style={tw`text-lg font-medium mb-2`}>Subtasks</Text>
-        {subtasks.map((subtask, index) => (
-          <View
-            key={index}
-            style={[
-              tw`p-2 mb-2 rounded-md`,
-              subtask.is_completed
-                ? tw`bg-green-100 border-l-4 border-green-500`
-                : tw`bg-gray-100 border-l-4 border-gray-300`,
-            ]}
-          >
-            <View style={tw`flex-row justify-between items-center`}>
-              <Text>{subtask.description}</Text>
-              <View style={tw`flex-row items-center`}>
-                <Text style={tw`text-xs mr-2`}>
-                  {subtask.is_completed ? "Completed" : "Not completed"}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => deleteSubtask(index)}
-                  style={tw`w-6 h-6 bg-red-500 rounded-full items-center justify-center`}
-                >
-                  <Text style={tw`text-white text-sm`}>×</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        ))}
-      </View>
-
-      <View style={tw`mb-4`}>
-        <TextInput
-          style={tw`border border-gray-300 rounded-md p-2 my-2`}
-          placeholder="Subtask description"
-          value={subtask_description}
-          onChangeText={setSubtask_description}
-        />
-        <View style={tw`flex-row items-center mb-2`}>
-          <Text style={tw`mr-2`}>Completed:</Text>
-          <Switch
-            value={subtask_is_completed}
-            onValueChange={() => setSubtask_is_completed(!subtask_is_completed)}
-          />
-        </View>
-        <TouchableOpacity
-          style={tw`bg-blue-500 p-2 rounded-md`}
-          onPress={() => addSubtask(subtask_description, subtask_is_completed)}
-        >
-          <Text style={tw`text-white`}>Add subtask</Text>
+        <TouchableOpacity onPress={handleSubmit}>
+          <Text style={tw`text-blue-500 text-base`}>Save</Text>
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity
-        style={tw`bg-blue-500 p-2 rounded-md`}
-        onPress={handleSubmit}
+      <ScrollView
+        style={tw`flex-1`}
+        contentContainerStyle={tw`p-4`}
+        keyboardShouldPersistTaps="handled"
       >
-        <Text style={tw`text-white`}>Create task</Text>
-      </TouchableOpacity>
-    </View>
+        <View style={tw`mb-4`}>
+          <Text
+            style={tw`text-sm font-medium mb-2 text-gray-700 dark:text-gray-300`}
+          >
+            Description
+          </Text>
+          <TextInput
+            style={tw`w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white`}
+            placeholder="Enter task description"
+            placeholderTextColor="#666"
+            value={description}
+            onChangeText={setDescription}
+          />
+        </View>
+
+        <View style={tw`mb-4`}>
+          <Text
+            style={tw`text-sm font-medium mb-2 text-gray-700 dark:text-gray-300`}
+          >
+            Status
+          </Text>
+          <View style={tw`flex-row items-center`}>
+            <Text style={tw`text-gray-700 dark:text-gray-300 mr-2`}>
+              Completed:
+            </Text>
+            <Switch
+              value={is_completed}
+              onValueChange={() => setIs_completed(!is_completed)}
+            />
+          </View>
+        </View>
+
+        <View style={tw`mb-6`}>
+          <Text
+            style={tw`text-sm font-medium mb-2 text-gray-700 dark:text-gray-300`}
+          >
+            Select a Note (Optional)
+          </Text>
+          <View style={tw``}>
+            {notes.map((note) => (
+              <TouchableOpacity
+                key={note.id}
+                onPress={() => setSelectedNote(note)}
+                style={[
+                  tw`p-3 rounded-lg border`,
+                  selectedNote?.id === note.id
+                    ? tw`border-blue-500 bg-blue-50 dark:bg-blue-900/20`
+                    : tw`border-gray-200 dark:border-gray-700`,
+                ]}
+              >
+                <View style={tw`flex-row items-center`}>
+                  <View
+                    style={[
+                      tw`w-3 h-3 rounded-full mr-2`,
+                      {
+                        backgroundColor: note.categories[0]?.color || "#9CA3AF",
+                      },
+                    ]}
+                  />
+                  <Text
+                    style={[
+                      tw`text-sm`,
+                      selectedNote?.id === note.id
+                        ? tw`text-blue-700 dark:text-blue-300`
+                        : tw`text-gray-700 dark:text-gray-300`,
+                    ]}
+                  >
+                    {note.title}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <View style={tw`mb-6`}>
+          <Text
+            style={tw`text-sm font-medium mb-2 text-gray-700 dark:text-gray-300`}
+          >
+            Subtasks
+          </Text>
+          {subtasks.map((subtask, index) => (
+            <View
+              key={index}
+              style={[
+                tw`p-3 mb-2 rounded-lg border`,
+                subtask.is_completed
+                  ? tw`border-green-500 bg-green-50 dark:bg-green-900/20`
+                  : tw`border-gray-200 dark:border-gray-700`,
+              ]}
+            >
+              <View style={tw`flex-row justify-between items-center`}>
+                <Text style={tw`text-gray-700 dark:text-gray-300`}>
+                  {subtask.description}
+                </Text>
+                <View style={tw`flex-row items-center`}>
+                  <Text
+                    style={tw`text-xs mr-2 text-gray-500 dark:text-gray-400`}
+                  >
+                    {subtask.is_completed ? "Completed" : "Not completed"}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => deleteSubtask(index)}
+                    style={tw`w-6 h-6 bg-red-500 rounded-full items-center justify-center`}
+                  >
+                    <Text style={tw`text-white text-sm`}>×</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          ))}
+
+          <View style={tw`mt-4`}>
+            <TextInput
+              style={tw`w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white`}
+              placeholder="Enter subtask description"
+              placeholderTextColor="#666"
+              value={subtask_description}
+              onChangeText={setSubtask_description}
+            />
+            <View style={tw`flex-row items-center mt-2 mb-4`}>
+              <Text style={tw`text-gray-700 dark:text-gray-300 mr-2`}>
+                Completed:
+              </Text>
+              <Switch
+                value={subtask_is_completed}
+                onValueChange={() =>
+                  setSubtask_is_completed(!subtask_is_completed)
+                }
+              />
+            </View>
+            <TouchableOpacity
+              style={tw`bg-blue-500 p-3 rounded-lg`}
+              onPress={() =>
+                addSubtask(subtask_description, subtask_is_completed)
+              }
+            >
+              <Text style={tw`text-white text-center font-medium`}>
+                Add Subtask
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import { User } from "@/services/auth/auth.types";
-import { storageService } from "@/services/storage/asyncStorage";
+import { secureStorage } from "@/services/storage/secureStorage";
 
 type AuthContextType = {
   signIn: (token: string, userData: User) => Promise<void>;
@@ -15,6 +15,7 @@ type AuthContextType = {
   isLoading: boolean;
   userToken: string | null;
   user: User | null;
+  isReady: boolean;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -23,6 +24,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   userToken: null,
   user: null,
+  isReady: false,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -31,10 +33,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [userToken, setUserTokenState] = useState<string | null>(null);
   const [user, setUserState] = useState<User | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const router = useRouter();
   const segments = useSegments();
 
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
   const checkAndRedirect = useCallback(() => {
+    if (!isMounted || !isReady) return;
+
     const inAuthGroup = segments[0] === "auth";
 
     if (!userToken && !inAuthGroup && !isLoading) {
@@ -42,17 +53,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else if (userToken && inAuthGroup) {
       router.replace("/");
     }
-  }, [userToken, isLoading, segments, router]);
-
-  useEffect(() => {
-    checkAndRedirect();
-  }, [checkAndRedirect]);
+  }, [userToken, isLoading, segments, router, isMounted, isReady]);
 
   useEffect(() => {
     const loadToken = async () => {
       try {
-        const token = await storageService.getUserToken();
-        const userData = await storageService.getUserData();
+        const token = await secureStorage.getAuthToken();
+        const userData = await secureStorage.getUserData();
 
         setUserTokenState(token);
         setUserState(userData);
@@ -60,30 +67,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error(error);
       } finally {
         setIsLoading(false);
+        setIsReady(true);
       }
     };
 
     loadToken();
   }, []);
 
+  useEffect(() => {
+    if (!isLoading && isMounted && isReady) {
+      checkAndRedirect();
+    }
+  }, [isLoading, isMounted, isReady, checkAndRedirect]);
+
   const signIn = async (token: string, userData: User) => {
     try {
-      await storageService.setUserToken(token);
-      await storageService.setUserData(userData);
+      await secureStorage.setAuthToken(token);
+      await secureStorage.setUserData(userData);
       setUserTokenState(token);
       setUserState(userData);
     } catch (error) {
       console.error(error);
+      throw error;
     }
   };
 
   const signOut = async () => {
     try {
-      await storageService.removeUserData();
+      await secureStorage.clearAll();
       setUserTokenState(null);
       setUserState(null);
     } catch (error) {
       console.error(error);
+      throw error;
     }
   };
 
@@ -95,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         userToken,
         user,
+        isReady,
       }}
     >
       {children}
