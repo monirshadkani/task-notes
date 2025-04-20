@@ -64,10 +64,8 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       if (isInitialized) return;
 
       try {
-        // First try to get from local storage
         const storedTasks = await storageService.getTasksStorage();
         if (storedTasks && storedTasks.length > 0) {
-          // Enrich stored tasks with note data
           const enrichedTasks = storedTasks.map((task) => {
             if (task.note_id) {
               const associatedNote = notes.find(
@@ -84,7 +82,6 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
           });
           setTasksState(enrichedTasks);
         } else {
-          // Only if storage is empty, try API
           await refreshTasks();
         }
         setIsInitialized(true);
@@ -100,15 +97,12 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
 
   const deleteTask = async (id: string) => {
     try {
-      // Update local state first for immediate UI feedback
       const updatedTasks = tasks.filter((task) => task.id.toString() !== id);
       setTasksState(updatedTasks);
       await storageService.setTasksStorage(updatedTasks);
 
-      // Then make the API call
       await taskService.deleteTaskApi(id);
     } catch (error) {
-      // If API call fails, revert to previous state
       console.error("Failed to delete task:", error);
       const storedTasks = await storageService.getTasksStorage();
       setTasksState(storedTasks);
@@ -118,17 +112,14 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateTask = async (id: string, task: Partial<Task>) => {
     try {
-      // Update local state first for immediate UI feedback
       const updatedTasks = tasks.map((t) =>
         t.id.toString() === id ? { ...t, ...task } : t
       );
       setTasksState(updatedTasks);
       await storageService.setTasksStorage(updatedTasks);
 
-      // Then make the API call
       await taskService.updateTaskApi(id, task);
     } catch (error) {
-      // If API call fails, revert to previous state
       console.error("Failed to update task:", error);
       const storedTasks = await storageService.getTasksStorage();
       setTasksState(storedTasks);
@@ -138,14 +129,12 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
 
   const toggleTask = async (id: string) => {
     try {
-      // Update local state first
       const updatedTasks = tasks.map((t) =>
         t.id.toString() === id ? { ...t, is_completed: !t.is_completed } : t
       );
       setTasksState(updatedTasks);
       await storageService.setTasksStorage(updatedTasks);
 
-      // Then sync with API in the background
       taskService.toggleTaskApi(id).catch((error) => {
         console.error("Failed to sync toggle with API:", error);
       });

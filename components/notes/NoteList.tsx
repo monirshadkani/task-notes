@@ -55,13 +55,11 @@ export const NoteList = () => {
   };
 
   const filteredNotes = notes.filter((note) => {
-    // Search filter
     const matchesSearch = searchQuery
       ? note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         note.content.toLowerCase().includes(searchQuery.toLowerCase())
       : true;
 
-    // Category filter
     const matchesCategory = selectedCategory
       ? note.categories.some((category) => category.id === selectedCategory)
       : true;
@@ -135,7 +133,7 @@ export const NoteList = () => {
             return (
               <TouchableOpacity
                 style={[
-                  tw`w-50 m-2 h-40 border-2 p-2 rounded-lg truncate`,
+                  tw`w-50 m-2 h-40 border-2 p-2 rounded-lg`,
                   {
                     backgroundColor,
                     borderColor: backgroundColor,
@@ -143,7 +141,10 @@ export const NoteList = () => {
                 ]}
                 onPress={() => router.push(`/notes/${item.id}`)}
               >
-                <Text style={[tw`font-bold`, { color: textColor }]}>
+                <Text
+                  style={[tw`font-bold`, { color: textColor }]}
+                  numberOfLines={1}
+                >
                   {item.title}
                 </Text>
 
@@ -196,7 +197,7 @@ export const NoteList = () => {
       <View style={tw`absolute bottom-15 right-6`}>
         <TouchableOpacity
           onPress={navigateToCreate}
-          style={tw`bg-blue-500 p-4 rounded-full shadow-lg`}
+          style={tw`bg-blue-500 p-4 rounded-full`}
         >
           <IconSymbol name="plus" size={24} color="white" />
         </TouchableOpacity>

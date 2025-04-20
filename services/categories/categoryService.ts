@@ -5,7 +5,15 @@ import { Category } from "@/types/category.types";
 
 export const categoryService = {
   async getCategoriesApi(): Promise<Category[]> {
-    return apiClient.get<Category[]>(ENDPOINTS.categories.list);
+    try {
+      const response = await apiClient.get<Category[]>(
+        ENDPOINTS.categories.list
+      );
+      return Array.isArray(response) ? response : [];
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+      return [];
+    }
   },
 
   async setCategories(

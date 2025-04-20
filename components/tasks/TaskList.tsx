@@ -217,7 +217,7 @@ export const TaskList = () => {
       <View style={tw`absolute bottom-15 right-6`}>
         <TouchableOpacity
           onPress={navigateToCreate}
-          style={tw`bg-blue-500 p-4 rounded-full shadow-lg`}
+          style={tw`bg-blue-500 p-4 rounded-full`}
         >
           <IconSymbol name="plus" size={24} color="white" />
         </TouchableOpacity>

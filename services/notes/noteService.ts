@@ -5,7 +5,13 @@ import { Note } from "@/types/note.types";
 
 export const noteService = {
   async getNotesApi(): Promise<Note[]> {
-    return apiClient.get<Note[]>(ENDPOINTS.notes.list);
+    try {
+      const response = await apiClient.get<Note[]>(ENDPOINTS.notes.list);
+      return Array.isArray(response) ? response : [];
+    } catch (error) {
+      console.error("Failed to fetch notes:", error);
+      return [];
+    }
   },
 
   async getNoteApi(id: string): Promise<Note> {

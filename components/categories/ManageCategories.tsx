@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -33,12 +33,6 @@ export const ManageCategories = ({
     color: "#000000",
     is_system: false,
   });
-
-  useEffect(() => {
-    if (visible) {
-      refreshCategories();
-    }
-  }, [visible]);
 
   const handleCreate = async () => {
     try {
