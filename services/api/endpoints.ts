@@ -1,6 +1,4 @@
-import { API_URL as ENV_API_URL } from "react-native-dotenv";
-
-const BASE_URL = ENV_API_URL;
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export const ENDPOINTS = {
   auth: {

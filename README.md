@@ -45,7 +45,10 @@ yarn start
 
 Create a `.env` file in the root directory with the following variables / Créer un fichier `.env` à la racine avec les variables suivantes :
 
-- `API_URL`: The base URL for your API (e.g., `http://localhost:3000` or your production API URL) / L'URL de base de votre API (ex: `http://localhost:3000` ou votre URL de production)
+- `EXPO_PUBLIC_API_URL`: The base URL for your API (e.g., `http://localhost:3000` or your production API URL) / L'URL de base de votre API (ex: `http://localhost:3000` ou votre URL de production)
+
+Note: All environment variables must be prefixed with `EXPO_PUBLIC_` to be accessible in your application.  
+Note : Toutes les variables d'environnement doivent être préfixées par `EXPO_PUBLIC_` pour être accessibles dans votre application.
 
 ## Project Structure / Structure du Projet
 
